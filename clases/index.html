@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClasesApp - Sistema de Gestión de Clases</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Sistema completo de gestión de alumnos, horarios y finanzas para profesores">
+    <meta name="theme-color" content="#4a90e2">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ClasesApp">
+    <meta name="msapplication-TileColor" content="#4a90e2">
+    <meta name="msapplication-config" content="/browserconfig.xml">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <link rel="mask-icon" href="/icons/icon-192x192.png" color="#4a90e2">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #ffffff;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center">
+    <div class="text-center text-white fade-in">
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold mb-4">🎓 ClasesApp</h1>
+            <p class="text-xl opacity-90">Sistema de Gestión de Clases</p>
+            <p class="text-sm opacity-75 mt-2">Actualizado: Enero 2025</p>
+        </div>
+        
+        <div class="mb-8">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <p class="text-lg">Cargando aplicación...</p>
+        </div>
+        
+        <div class="space-y-4">
+            <a href="dashboard.html" 
+               class="inline-block bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                📊 Ir al Dashboard
+            </a>
+            
+            <div class="text-sm opacity-75">
+                <p>Si no se redirige automáticamente, haz clic en el botón</p>
+            </div>
+        </div>
+        
+        <div class="mt-12 text-sm opacity-60">
+            <p>📱 Instalable como aplicación móvil</p>
+            <p>🔄 Funciona offline</p>
+            <p>⚡ Carga rápida</p>
+        </div>
+    </div>
+
+    <script>
+        // Redirección automática después de 3 segundos
+        setTimeout(() => {
+            window.location.href = 'dashboard.html';
+        }, 3000);
+        
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('Service Worker registrado:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('Error al registrar Service Worker:', error);
+                    });
+            });
+        }
+        
+        // PWA Install Prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Mostrar notificación de instalación
+            const installNotification = document.createElement('div');
+            installNotification.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg';
+            installNotification.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <span>📱</span>
+                    <span>Instalar app</span>
+                    <button onclick="installApp()" class="bg-white text-green-600 px-2 py-1 rounded text-sm">Instalar</button>
+                </div>
+            `;
+            document.body.appendChild(installNotification);
+        });
+        
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('Usuario aceptó instalar la app');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -1916,10 +1916,10 @@
         console.log('- LocalStorage disponible:', typeof(Storage) !== "undefined");
         
         // Verificar datos cargados
-        const inst = localStorage.getItem('clases_institutions');
-        const att = localStorage.getItem('clases_attendance');
-        console.log('- Instituciones cargadas:', inst ? JSON.parse(inst).length : 0);
-        console.log('- Asistencia cargada:', att ? Object.keys(JSON.parse(att)).length : 0);
+        const instData = localStorage.getItem('clases_institutions');
+        const attData = localStorage.getItem('clases_attendance');
+        console.log('- Instituciones cargadas:', instData ? JSON.parse(instData).length : 0);
+        console.log('- Asistencia cargada:', attData ? Object.keys(JSON.parse(attData)).length : 0);
         
         // Mostrar notificación de diagnóstico
         const diagnosticInfo = document.createElement('div');
@@ -1938,8 +1938,8 @@
         `;
         diagnosticInfo.innerHTML = `
           📱 Móvil detectado<br>
-          📊 Datos: ${inst ? JSON.parse(inst).length : 0} instituciones<br>
-          📅 Asistencia: ${att ? Object.keys(JSON.parse(att)).length : 0} registros<br>
+          📊 Datos: ${instData ? JSON.parse(instData).length : 0} instituciones<br>
+          📅 Asistencia: ${attData ? Object.keys(JSON.parse(attData)).length : 0} registros<br>
           <button onclick="this.parentElement.remove()" style="background: #4CAF50; border: none; color: white; padding: 2px 8px; border-radius: 3px; margin-top: 5px; font-size: 10px;">Cerrar</button>
         `;
         document.body.appendChild(diagnosticInfo);

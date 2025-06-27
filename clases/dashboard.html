@@ -12,16 +12,15 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="ClasesApp">
   <meta name="msapplication-TileColor" content="#4a90e2">
-  <meta name="msapplication-config" content="/browserconfig.xml">
   
   <!-- PWA Manifest -->
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="manifest.json">
   
   <!-- PWA Icons -->
-  <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
-  <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
-  <link rel="mask-icon" href="/icons/icon-192x192.png" color="#4a90e2">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16x16.png">
+  <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+  <link rel="mask-icon" href="icons/icon-192x192.png" color="#4a90e2">
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -1595,18 +1594,15 @@
 
     // Llamar al render del panel al inicio y tras cambios
     renderInstitutionsPanel = renderInstitutionsPanel.bind(window);
-    // Llamar después de cargar datos y tras cada cambio
-    // ...
-    // Al final de la inicialización, envolver en una condición:
-    if (!document.getElementById('alumnosPage') || document.getElementById('alumnosPage').classList.contains('hidden')) {
-      loadFromLocal();
-      updateYearBadge();
-      renderMonthDropdown();
-      renderAnnualPeriodDropdown();
-      renderInstitutionsPanel();
-      renderDashboard();
-      renderChartsAndSummary();
-    }
+    
+    // Cargar datos al inicio
+    loadFromLocal();
+    updateYearBadge();
+    renderMonthDropdown();
+    renderAnnualPeriodDropdown();
+    renderInstitutionsPanel();
+    renderDashboard();
+    renderChartsAndSummary();
 
     // 2. En el script, al seleccionar días o cambiar el mes, calcular automáticamente el valor por defecto:
     document.getElementById('instDays').onchange = setDiasTrabajarDefault;
@@ -1851,7 +1847,7 @@
     // PWA Service Worker Registration
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
+        navigator.serviceWorker.register('sw.js')
           .then((registration) => {
             console.log('Service Worker registrado exitosamente:', registration.scope);
             
@@ -1912,6 +1908,48 @@
       
       if (isMobile) {
         document.body.classList.add('mobile-detected');
+        
+        // Mostrar información de diagnóstico en móvil
+        console.log('🔍 Diagnóstico móvil:');
+        console.log('- User Agent:', navigator.userAgent);
+        console.log('- Screen width:', window.innerWidth);
+        console.log('- LocalStorage disponible:', typeof(Storage) !== "undefined");
+        
+        // Verificar datos cargados
+        const inst = localStorage.getItem('clases_institutions');
+        const att = localStorage.getItem('clases_attendance');
+        console.log('- Instituciones cargadas:', inst ? JSON.parse(inst).length : 0);
+        console.log('- Asistencia cargada:', att ? Object.keys(JSON.parse(att)).length : 0);
+        
+        // Mostrar notificación de diagnóstico
+        const diagnosticInfo = document.createElement('div');
+        diagnosticInfo.id = 'mobileDiagnostic';
+        diagnosticInfo.style.cssText = `
+          position: fixed;
+          top: 10px;
+          right: 10px;
+          background: rgba(0,0,0,0.8);
+          color: white;
+          padding: 10px;
+          border-radius: 5px;
+          font-size: 12px;
+          z-index: 9999;
+          max-width: 200px;
+        `;
+        diagnosticInfo.innerHTML = `
+          📱 Móvil detectado<br>
+          📊 Datos: ${inst ? JSON.parse(inst).length : 0} instituciones<br>
+          📅 Asistencia: ${att ? Object.keys(JSON.parse(att)).length : 0} registros<br>
+          <button onclick="this.parentElement.remove()" style="background: #4CAF50; border: none; color: white; padding: 2px 8px; border-radius: 3px; margin-top: 5px; font-size: 10px;">Cerrar</button>
+        `;
+        document.body.appendChild(diagnosticInfo);
+        
+        // Auto-remover después de 10 segundos
+        setTimeout(() => {
+          if (diagnosticInfo.parentElement) {
+            diagnosticInfo.remove();
+          }
+        }, 10000);
         
         // Forzar estilos móviles
         const style = document.createElement('style');

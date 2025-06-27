@@ -12,16 +12,15 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="ClasesApp">
     <meta name="msapplication-TileColor" content="#4a90e2">
-    <meta name="msapplication-config" content="/browserconfig.xml">
     
     <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="manifest.json">
     
     <!-- PWA Icons -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
-    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
-    <link rel="mask-icon" href="/icons/icon-192x192.png" color="#4a90e2">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16x16.png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="mask-icon" href="icons/icon-192x192.png" color="#4a90e2">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -55,6 +54,41 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        
+        .install-button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        .install-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+        
+        .install-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
     </style>
 </head>
 <body class="flex items-center justify-center">
@@ -86,6 +120,13 @@
             <p>🔄 Funciona offline</p>
             <p>⚡ Carga rápida</p>
         </div>
+        
+        <!-- Botón de instalación manual -->
+        <div id="installContainer" class="mt-6" style="display: none;">
+            <button id="installButton" class="install-button">
+                📱 Instalar como App
+            </button>
+        </div>
     </div>
 
     <script>
@@ -97,7 +138,7 @@
         // PWA Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
+                navigator.serviceWorker.register('sw.js')
                     .then((registration) => {
                         console.log('Service Worker registrado:', registration.scope);
                     })
@@ -109,21 +150,22 @@
         
         // PWA Install Prompt
         let deferredPrompt;
+        const installContainer = document.getElementById('installContainer');
+        const installButton = document.getElementById('installButton');
+        
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             
-            // Mostrar notificación de instalación
-            const installNotification = document.createElement('div');
-            installNotification.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg';
-            installNotification.innerHTML = `
-                <div class="flex items-center space-x-2">
-                    <span>📱</span>
-                    <span>Instalar app</span>
-                    <button onclick="installApp()" class="bg-white text-green-600 px-2 py-1 rounded text-sm">Instalar</button>
-                </div>
-            `;
-            document.body.appendChild(installNotification);
+            // Mostrar botón de instalación
+            installContainer.style.display = 'block';
+            
+            // Mostrar notificación
+            showInstallNotification();
+        });
+        
+        installButton.addEventListener('click', () => {
+            installApp();
         });
         
         function installApp() {
@@ -132,11 +174,71 @@
                 deferredPrompt.userChoice.then((choiceResult) => {
                     if (choiceResult.outcome === 'accepted') {
                         console.log('Usuario aceptó instalar la app');
+                        showSuccessNotification();
                     }
                     deferredPrompt = null;
+                    installContainer.style.display = 'none';
                 });
             }
         }
+        
+        function showInstallNotification() {
+            const notification = document.createElement('div');
+            notification.className = 'install-notification';
+            notification.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <span style="font-size: 24px;">📱</span>
+                    <div>
+                        <div style="font-weight: bold;">¡Instala ClasesApp!</div>
+                        <div style="font-size: 14px; opacity: 0.9;">Accede desde tu pantalla de inicio</div>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
+                        ✕
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            // Auto-remover después de 10 segundos
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 10000);
+        }
+        
+        function showSuccessNotification() {
+            const notification = document.createElement('div');
+            notification.className = 'install-notification';
+            notification.style.background = 'linear-gradient(45deg, #2196F3, #1976D2)';
+            notification.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <span style="font-size: 24px;">✅</span>
+                    <div>
+                        <div style="font-weight: bold;">¡App instalada!</div>
+                        <div style="font-size: 14px; opacity: 0.9;">Busca ClasesApp en tu pantalla de inicio</div>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
+                        ✕
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+        
+        // Detectar si ya está instalada
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('Aplicación instalada');
+            showSuccessNotification();
+        });
     </script>
 </body>
 </html> 

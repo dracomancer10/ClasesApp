@@ -89,10 +89,26 @@
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+        
+        /* Estilos móviles */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .install-button {
+                width: 100%;
+                margin-top: 1rem;
+            }
+        }
     </style>
 </head>
 <body class="flex items-center justify-center">
-    <div class="text-center text-white fade-in">
+    <div class="container text-center text-white fade-in">
         <div class="mb-8">
             <h1 class="text-4xl font-bold mb-4">🎓 ClasesApp</h1>
             <p class="text-xl opacity-90">Sistema de Gestión de Clases</p>
@@ -126,6 +142,16 @@
             <button id="installButton" class="install-button">
                 📱 Instalar como App
             </button>
+        </div>
+        
+        <!-- Instrucciones de instalación -->
+        <div class="mt-8 p-4 bg-white bg-opacity-10 rounded-lg">
+            <h3 class="font-semibold mb-2">📱 Cómo instalar en móvil:</h3>
+            <div class="text-sm space-y-1">
+                <p><strong>Chrome/Edge:</strong> Toca ⋮ → "Instalar aplicación"</p>
+                <p><strong>Safari:</strong> Toca 📤 → "Añadir a pantalla de inicio"</p>
+                <p><strong>Firefox:</strong> Toca ⋮ → "Instalar aplicación"</p>
+            </div>
         </div>
     </div>
 
@@ -200,24 +226,23 @@
             `;
             document.body.appendChild(notification);
             
-            // Auto-remover después de 10 segundos
             setTimeout(() => {
                 if (notification.parentElement) {
                     notification.remove();
                 }
-            }, 10000);
+            }, 5000);
         }
         
         function showSuccessNotification() {
             const notification = document.createElement('div');
             notification.className = 'install-notification';
-            notification.style.background = 'linear-gradient(45deg, #2196F3, #1976D2)';
+            notification.style.background = 'linear-gradient(45deg, #4CAF50, #45a049)';
             notification.innerHTML = `
                 <div class="flex items-center space-x-3">
                     <span style="font-size: 24px;">✅</span>
                     <div>
-                        <div style="font-weight: bold;">¡App instalada!</div>
-                        <div style="font-size: 14px; opacity: 0.9;">Busca ClasesApp en tu pantalla de inicio</div>
+                        <div style="font-weight: bold;">¡Instalación exitosa!</div>
+                        <div style="font-size: 14px; opacity: 0.9;">La app está disponible en tu pantalla de inicio</div>
                     </div>
                     <button onclick="this.parentElement.parentElement.remove()" 
                             style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
@@ -231,14 +256,19 @@
                 if (notification.parentElement) {
                     notification.remove();
                 }
-            }, 5000);
+            }, 3000);
         }
         
-        // Detectar si ya está instalada
+        // Detectar si ya está instalado
         window.addEventListener('appinstalled', (evt) => {
             console.log('Aplicación instalada');
             showSuccessNotification();
         });
+        
+        // Verificar si es standalone (ya instalado)
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('Aplicación ejecutándose en modo standalone');
+        }
     </script>
 </body>
 </html> 

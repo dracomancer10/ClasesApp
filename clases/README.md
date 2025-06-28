@@ -1,211 +1,164 @@
 # 🎓 ClasesApp - Sistema de Gestión de Clases
 
-Una aplicación web completa para la gestión de alumnos, horarios y finanzas para profesores.
+Sistema completo de gestión de alumnos, horarios y finanzas para profesores, desarrollado como Progressive Web App (PWA).
 
 ## ✨ Características
 
-### 📱 **Progressive Web App (PWA)**
-- ✅ Instalable como aplicación nativa
-- ✅ Funcionamiento offline
-- ✅ Notificaciones push
-- ✅ Sincronización automática
+- 📊 **Dashboard completo** con estadísticas y gráficos
+- 👥 **Gestión de alumnos** con asistencia y pagos
+- 📅 **Organizador de horarios** semanal
+- 💰 **Gestor financiero** con reportes
+- 📱 **PWA instalable** en móviles y desktop
+- 🔄 **Sincronización de datos** entre dispositivos
+- 💾 **Sistema de backup/restore**
+- 📈 **Reportes PDF** automáticos
+- 🌐 **Funciona offline**
 
-### 🎯 **Funcionalidades Principales**
-- **Dashboard**: Vista general de ingresos y estadísticas
-- **Gestión de Alumnos**: Registro y seguimiento de estudiantes
-- **Organizador de Horarios**: Planificación semanal de clases
-- **Gestor Financiero**: Control de ingresos y gastos
-- **Reportes**: Análisis mensuales y anuales
+## 🚀 Instalación
 
-### 📊 **Módulos Incluidos**
-1. **Panel de Gestión**: Dashboard principal con métricas
-2. **Gestión de Instituciones**: Configuración de centros educativos
-3. **Control de Alumnos**: Registro y seguimiento individual
-4. **Organizador de Horarios**: Planificación semanal visual
-5. **Sistema de Reportes**: Análisis financieros detallados
+### Opción 1: Acceso Web
+1. Ve a la URL de la aplicación
+2. La aplicación se carga automáticamente
+3. Para instalarla como app, sigue las instrucciones en pantalla
 
-## 🚀 **Instalación y Uso**
+### Opción 2: Instalación PWA
 
-### **Opción 1: Uso Local**
-1. Descarga todos los archivos
-2. Abre `dashboard.html` en tu navegador
-3. ¡Listo para usar!
+#### En Chrome/Edge (Android/Desktop):
+1. Abre la aplicación en el navegador
+2. Toca el menú (⋮) en la esquina superior derecha
+3. Selecciona "Instalar aplicación" o "Añadir a pantalla de inicio"
+4. Confirma la instalación
 
-### **Opción 2: GitHub Pages (Recomendado)**
-1. Crea un repositorio en GitHub
-2. Sube todos los archivos
-3. Activa GitHub Pages en Settings > Pages
-4. Tu app estará disponible en `tuusuario.github.io/tuproyecto`
+#### En Safari (iOS):
+1. Abre la aplicación en Safari
+2. Toca el botón de compartir (📤)
+3. Selecciona "Añadir a pantalla de inicio"
+4. Confirma la instalación
 
-### **Opción 3: Netlify**
-1. Ve a [netlify.com](https://netlify.com)
-2. Arrastra la carpeta del proyecto
-3. Obtén una URL automáticamente
-
-## 📱 **Instalación como PWA**
-
-### **En Android (Chrome)**
-1. Abre la aplicación en Chrome
+#### En Firefox:
+1. Abre la aplicación en Firefox
 2. Toca el menú (⋮)
 3. Selecciona "Instalar aplicación"
 4. Confirma la instalación
 
-### **En iOS (Safari)**
-1. Abre la aplicación en Safari
-2. Toca el botón compartir (□↑)
-3. Selecciona "Añadir a pantalla de inicio"
-4. Confirma la instalación
+## 📱 Uso en Móvil
 
-### **En Desktop**
-1. Abre la aplicación en Chrome/Edge
-2. Busca el ícono de instalación en la barra de direcciones
-3. Haz clic en "Instalar"
+### Navegación
+- **Botón hamburguesa**: Toca el botón ☰ en la esquina superior izquierda
+- **Cerrar menú**: Toca fuera del menú o presiona Escape
+- **Navegación táctil**: Todos los botones están optimizados para touch
 
-## 🛠️ **Estructura del Proyecto**
+### Sincronización de Datos
+1. **Sincronización automática**: Los datos se guardan localmente
+2. **Backup manual**: Usa el botón "💾 Crear Backup" para exportar datos
+3. **Restaurar datos**: Usa "📂 Restaurar Backup" para importar desde otro dispositivo
+
+## 🔄 Sincronización Entre Dispositivos
+
+### Método 1: Backup/Restore
+1. En el dispositivo origen: Toca "💾 Crear Backup"
+2. Se descargará un archivo JSON
+3. Transfiere el archivo al nuevo dispositivo
+4. En el nuevo dispositivo: Toca "📂 Restaurar Backup"
+5. Selecciona el archivo JSON descargado
+
+### Método 2: Sincronización Manual
+1. Toca "🔄 Sincronizar Datos" en ambos dispositivos
+2. Los datos se sincronizarán automáticamente
+
+## 🛠️ Solución de Problemas
+
+### La aplicación no se instala
+- **Verifica el navegador**: Asegúrate de usar Chrome, Edge, Safari o Firefox
+- **Conexión HTTPS**: La PWA requiere conexión segura
+- **Limpiar caché**: Borra el caché del navegador e intenta de nuevo
+- **Actualizar navegador**: Asegúrate de tener la versión más reciente
+
+### Los datos no aparecen
+- **Verificar localStorage**: Asegúrate de que el navegador soporte localStorage
+- **Restaurar backup**: Usa la función de restore si tienes un backup
+- **Limpiar datos**: En casos extremos, limpia los datos del navegador
+
+### Vista móvil desajustada
+- **Rotar pantalla**: Intenta cambiar la orientación
+- **Actualizar página**: Recarga la aplicación
+- **Verificar zoom**: Asegúrate de que el zoom esté al 100%
+
+### Problemas de sincronización
+- **Verificar archivo**: Asegúrate de que el archivo de backup sea válido
+- **Reintentar**: Vuelve a intentar la sincronización
+- **Backup manual**: Usa la función de backup/restore como alternativa
+
+## 📁 Estructura de Archivos
 
 ```
 clases/
-├── dashboard.html              # Página principal
-├── alumnos.html               # Gestión de alumnos
-├── gestor-financiero.html     # Control financiero
-├── manifest.json              # Configuración PWA
-├── sw.js                      # Service Worker
-├── generate-icons.html        # Generador de íconos
-├── README.md                  # Este archivo
-├── Organizador de Horarios Personal/
-│   ├── Organizador de Horarios Personal.html
-│   ├── app.js
-│   └── styles.css
-├── icons/                     # Íconos de la PWA
-└── backup_completo_2025-06-26_19-52/
+├── index.html              # Página de bienvenida
+├── dashboard.html          # Dashboard principal
+├── alumnos.html           # Gestión de alumnos
+├── gestor-financiero.html # Gestor financiero
+├── manifest.json          # Configuración PWA
+├── sw.js                  # Service Worker
+├── sync.js               # Sistema de sincronización
+├── icons/                # Íconos PWA
+└── Organizador de Horarios Personal/
+    └── Organizador de Horarios Personal.html
 ```
 
-## 📋 **Guía de Uso**
+## 🔧 Configuración Técnica
 
-### **1. Configuración Inicial**
-1. Abre el dashboard
-2. Ve a "Institución" > "Registrar institución"
-3. Completa los datos de tu centro educativo
-4. Configura los días de trabajo y valores
+### Requisitos del Navegador
+- **Chrome**: Versión 67+
+- **Firefox**: Versión 60+
+- **Safari**: Versión 11.1+
+- **Edge**: Versión 79+
 
-### **2. Gestión de Alumnos**
-1. Navega a "Gestión de alumnos"
-2. Agrega nuevos estudiantes
-3. Registra asistencia y pagos
-4. Genera reportes individuales
+### Tecnologías Utilizadas
+- **HTML5**: Estructura semántica
+- **CSS3**: Estilos con Tailwind CSS
+- **JavaScript**: Lógica de aplicación
+- **PWA**: Service Worker y Manifest
+- **Chart.js**: Gráficos interactivos
+- **jsPDF**: Generación de reportes PDF
 
-### **3. Organización de Horarios**
-1. Ve a "Organizador de Horarios"
-2. Crea actividades y clases
-3. Organiza tu semana visualmente
-4. Exporta horarios en PDF
+## 📊 Datos Almacenados
 
-### **4. Control Financiero**
-1. Accede al "Gestor Financiero"
-2. Registra ingresos y gastos
-3. Revisa reportes mensuales
-4. Analiza tendencias
+La aplicación guarda los siguientes datos localmente:
+- Lista de alumnos
+- Asistencia y pagos
+- Horarios semanales
+- Transacciones financieras
+- Configuraciones del sistema
 
-## 🔧 **Configuración Avanzada**
+## 🔒 Privacidad y Seguridad
 
-### **Personalización de Colores**
-Edita las variables CSS en `styles.css`:
-```css
-:root {
-    --primary-color: #4a90e2;
-    --secondary-color: #f5f5f5;
-    --text-color: #333;
-}
-```
+- **Datos locales**: Toda la información se guarda en tu dispositivo
+- **Sin servidor**: No se envían datos a servidores externos
+- **Backup seguro**: Los archivos de backup son locales
+- **Cifrado**: Los datos se almacenan de forma segura
 
-### **Configuración PWA**
-Modifica `manifest.json` para personalizar:
-- Nombre de la aplicación
-- Colores del tema
-- Íconos
-- Comportamiento offline
+## 🆘 Soporte
 
-### **Backup y Restauración**
-- **Exportar**: Usa "Guardar Todo" para respaldo completo
-- **Importar**: Usa "Cargar Todo" para restaurar datos
-- **Formato**: Los datos se guardan en JSON
+Si encuentras problemas:
 
-## 📊 **Funcionalidades Offline**
+1. **Revisa esta documentación**
+2. **Verifica la configuración del navegador**
+3. **Intenta en otro navegador**
+4. **Crea un backup antes de hacer cambios**
 
-La aplicación funciona completamente offline:
-- ✅ Datos guardados localmente
-- ✅ Interfaz disponible sin internet
-- ✅ Sincronización automática al reconectar
-- ✅ Notificaciones de actualizaciones
+## 📝 Changelog
 
-## 🔔 **Notificaciones**
-
-La PWA puede enviar notificaciones para:
-- Recordatorios de clases
-- Actualizaciones de la aplicación
-- Alertas importantes
-
-## 📈 **Reportes Disponibles**
-
-### **Mensuales**
-- Ingresos por institución
-- Gastos de pasajes
-- Descuentos aplicados
-- Ganancia neta
-
-### **Anuales**
-- Tendencias de crecimiento
-- Comparativas entre meses
-- Proyecciones futuras
-
-## 🛡️ **Seguridad y Privacidad**
-
-- ✅ Datos almacenados localmente
-- ✅ No se envían datos a servidores externos
-- ✅ Respaldos en tu dispositivo
-- ✅ Control total de tu información
-
-## 🔄 **Actualizaciones**
-
-### **Automáticas**
-- La PWA se actualiza automáticamente
-- Notificaciones de nuevas versiones
-- Instalación con un clic
-
-### **Manuales**
-- Descarga la nueva versión
-- Reemplaza los archivos
-- Los datos se mantienen
-
-## 📞 **Soporte**
-
-### **Problemas Comunes**
-
-**La app no se instala:**
-- Verifica que uses HTTPS o localhost
-- Asegúrate de que el manifest.json esté correcto
-
-**No funciona offline:**
-- Revisa que el service worker esté registrado
-- Verifica la consola del navegador
-
-**Datos no se guardan:**
-- Comprueba el almacenamiento local
-- Verifica permisos del navegador
-
-## 🎯 **Próximas Funcionalidades**
-
-- [ ] Sincronización con Google Calendar
-- [ ] Notificaciones push avanzadas
-- [ ] Modo oscuro
-- [ ] Exportación a Excel
-- [ ] Múltiples monedas
-- [ ] Sistema de facturación
-
-## 📄 **Licencia**
-
-Este proyecto es de uso libre para fines educativos y comerciales.
+### Versión 1.0.0 (Enero 2025)
+- ✅ Dashboard completo con estadísticas
+- ✅ Gestión de alumnos
+- ✅ Organizador de horarios
+- ✅ Gestor financiero
+- ✅ Sistema PWA
+- ✅ Sincronización de datos
+- ✅ Backup y restore
+- ✅ Reportes PDF
+- ✅ Diseño responsive
 
 ---
 
-**¡Disfruta usando ClasesApp! 🎓✨** 
+**Desarrollado con ❤️ para profesores** 

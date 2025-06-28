@@ -30,6 +30,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   
+  <!-- Sistema de sincronización -->
+  <script src="sync.js"></script>
+  
   <style>
     /* Estilos base */
     .sidebar-btn {
@@ -64,1952 +67,570 @@
       color: rgb(147, 197, 253);
     }
     
-    /* Detectar móviles con JavaScript */
-    .mobile-detected {
-      /* Estilos que se aplican solo en móviles */
+    /* Botón hamburguesa para móvil */
+    .mobile-menu-btn {
+      display: none;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 1001;
+      background: #4a90e2;
+      color: white;
+      border: none;
+      padding: 0.75rem;
+      border-radius: 0.25rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
     }
     
-    /* Estilos específicos para móviles - MÁS AGRESIVOS */
-    @media (max-width: 768px), (max-device-width: 768px), (orientation: portrait) {
-      /* Forzar sidebar móvil */
-      nav { 
-        position: fixed !important;
-        top: 0 !important;
-        left: -100% !important;
-        width: 80% !important;
-        height: 100vh !important;
-        z-index: 1000 !important;
-        transition: left 0.3s ease !important;
-        background: rgb(31, 41, 55) !important;
+    /* Overlay para cerrar sidebar */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+    }
+    
+    /* Estilos responsivos mejorados */
+    @media (max-width: 768px) {
+      /* Mostrar botón hamburguesa */
+      .mobile-menu-btn {
+        display: block;
+      }
+      
+      /* Sidebar móvil */
+      nav {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 80%;
+        max-width: 300px;
+        height: 100vh;
+        z-index: 1000;
+        transition: left 0.3s ease;
+        background: rgb(31, 41, 55);
+        overflow-y: auto;
       }
       
       nav.open {
-        left: 0 !important;
-      }
-      
-      /* Ocultar sidebar por defecto en móvil */
-      nav:not(.open) {
-        display: none !important;
+        left: 0;
       }
       
       /* Header responsive */
       header {
         margin-left: 0 !important;
-        padding: 1rem !important;
-        width: 100% !important;
+        padding: 1rem;
+        width: 100%;
       }
       
-      /* Contenedor principal - SIN MARGEN IZQUIERDO */
-      div[style*="margin-left:12rem"] {
+      /* Contenedor principal */
+      .main-content {
         margin-left: 0 !important;
-        padding: 0.5rem !important;
-        width: 100% !important;
-        max-width: 100% !important;
+        padding: 1rem;
+        width: 100%;
+        max-width: 100%;
       }
       
       /* Títulos más pequeños */
       h1 {
-        font-size: 1.5rem !important;
-        line-height: 1.2 !important;
+        font-size: 1.5rem;
+        line-height: 1.2;
       }
       
       /* Botones más grandes para touch */
       button, .btn {
-        padding: 0.75rem 1rem !important;
-        font-size: 1rem !important;
-        min-height: 44px !important;
-        touch-action: manipulation !important;
-      }
-      
-      /* Dropdowns más grandes */
-      .dropdown-menu {
-        min-width: 200px !important;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        min-height: 44px;
+        touch-action: manipulation;
       }
       
       /* Tablas con scroll horizontal */
-      .overflow-x-auto {
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
+      .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
       }
       
       /* Cards más compactas */
       .card {
-        margin-bottom: 1rem !important;
-        padding: 1rem !important;
+        margin-bottom: 1rem;
+        padding: 1rem;
       }
       
       /* Gráficos responsivos */
       canvas {
-        max-width: 100% !important;
-        height: auto !important;
+        max-width: 100%;
+        height: auto;
       }
       
       /* Modales más grandes en móvil */
       .modal-content {
-        width: 95% !important;
-        max-width: none !important;
-        margin: 1rem !important;
-      }
-      
-      /* Botón hamburguesa - SIEMPRE VISIBLE EN MÓVIL */
-      .mobile-menu-btn {
-        display: block !important;
-        position: fixed !important;
-        top: 1rem !important;
-        left: 1rem !important;
-        z-index: 1001 !important;
-        background: #4a90e2 !important;
-        color: white !important;
-        border: none !important;
-        padding: 0.75rem !important;
-        border-radius: 0.25rem !important;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.3) !important;
-      }
-      
-      /* Overlay para cerrar sidebar */
-      .sidebar-overlay {
-        display: none !important;
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
-        background: rgba(0,0,0,0.5) !important;
-        z-index: 999 !important;
-      }
-      
-      .sidebar-overlay.open {
-        display: block !important;
-      }
-      
-      /* Forzar responsive en todos los elementos */
-      * {
-        box-sizing: border-box !important;
-      }
-      
-      /* Mejorar espaciado */
-      .space-y-4 > * + * {
-        margin-top: 1rem !important;
-      }
-      
-      /* Texto más legible */
-      body {
-        font-size: 16px !important;
-        line-height: 1.5 !important;
+        width: 95%;
+        max-width: none;
+        margin: 1rem;
       }
     }
     
-    /* Estilos para tablets */
-    @media (min-width: 769px) and (max-width: 1024px) {
-      nav {
-        width: 200px !important;
-      }
-      
-      div[style*="margin-left:12rem"] {
-        margin-left: 200px !important;
-      }
+    /* Notificación de sincronización */
+    .sync-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(45deg, #4CAF50, #45a049);
+      color: white;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+      z-index: 1000;
+      animation: slideIn 0.5s ease;
     }
     
-    /* Estilos para pantallas muy pequeñas */
-    @media (max-width: 480px) {
-      .mobile-menu-btn {
-        top: 0.5rem !important;
-        left: 0.5rem !important;
-        padding: 0.5rem !important;
-      }
-      
-      header {
-        padding: 0.5rem !important;
-      }
-      
-      div[style*="margin-left:12rem"] {
-        padding: 0.25rem !important;
-      }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
   </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-  <!-- Botón hamburguesa para móviles -->
-  <button id="mobileMenuBtn" class="mobile-menu-btn md:hidden">
-    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+<body class="bg-gray-100">
+  <!-- Botón hamburguesa para móvil -->
+  <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+    <svg width="24" height="24" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
     </svg>
   </button>
   
   <!-- Overlay para cerrar sidebar -->
-  <div id="sidebarOverlay" class="sidebar-overlay"></div>
-  
-  <!-- Sidebar de navegación sobria -->
-  <nav id="sidebar" class="bg-gray-900 text-white w-48 min-h-screen flex flex-col py-6 px-4 fixed left-0 top-0 z-30 shadow-lg md:relative">
-    <span class="text-2xl font-bold tracking-wide mb-8 text-center sidebar-text">Panel de Gestión</span>
-    <div class="flex flex-col gap-2 flex-1">
-      <!-- Desplegable de Institución -->
-      <div class="relative">
-        <button id="institucionDropdownBtn" class="sidebar-btn w-full flex items-center justify-between">
-          <span>Institución</span>
-          <svg class="w-4 h-4 transition-transform" id="institucionDropdownIcon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-          </svg>
+  <div class="sidebar-overlay" onclick="closeMobileMenu()"></div>
+
+  <!-- Sidebar -->
+  <nav class="fixed top-0 left-0 h-full w-48 bg-gray-800 text-white shadow-lg">
+    <div class="p-4">
+      <h2 class="text-xl font-bold mb-4">ClasesApp</h2>
+      <div class="space-y-2">
+        <button class="sidebar-btn" onclick="showSection('dashboard')">
+          📊 Dashboard
         </button>
-        <div id="institucionDropdownMenu" class="bg-gray-800 rounded shadow-lg hidden mt-1">
-          <button id="openModalBtn" class="w-full text-left px-4 py-2 hover:bg-gray-700 hover:text-blue-300 transition dropdown-text">Registrar institución</button>
-          <button id="panelInstitucionesBtn" class="w-full text-left px-4 py-2 hover:bg-gray-700 hover:text-blue-300 transition dropdown-text">Panel de instituciones</button>
-        </div>
+        <button class="sidebar-btn" onclick="showSection('alumnos')">
+          👥 Alumnos
+        </button>
+        <button class="sidebar-btn" onclick="showSection('horarios')">
+          📅 Horarios
+        </button>
+        <button class="sidebar-btn" onclick="showSection('finanzas')">
+          💰 Finanzas
+        </button>
+        <button class="sidebar-btn" onclick="showSection('reportes')">
+          📈 Reportes
+        </button>
       </div>
       
-      <!-- Desplegable de Guardar/Abrir -->
-      <div class="relative">
-        <button id="guardarAbrirDropdownBtn" class="sidebar-btn w-full flex items-center justify-between">
-          <span>Guardar/Abrir</span>
-          <svg class="w-4 h-4 transition-transform" id="guardarAbrirDropdownIcon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-          </svg>
+      <!-- Botón de sincronización -->
+      <div class="mt-8 p-4 bg-gray-700 rounded">
+        <button class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mb-2" onclick="syncData()">
+          🔄 Sincronizar Datos
         </button>
-        <div id="guardarAbrirDropdownMenu" class="bg-gray-800 rounded shadow-lg hidden mt-1">
-          <button id="exportJsonBtn" class="w-full text-left px-4 py-2 hover:bg-gray-700 hover:text-blue-300 transition dropdown-text">Exportar JSON</button>
-          <button id="importJsonBtn" class="w-full text-left px-4 py-2 hover:bg-gray-700 hover:text-blue-300 transition dropdown-text">Importar JSON</button>
-          <button id="exportPdfBtn" class="w-full text-left px-4 py-2 hover:bg-gray-700 hover:text-blue-300 transition dropdown-text">Exportar PDF</button>
-          <button id="guardarTodoBtn" class="w-full text-left px-4 py-2 hover:bg-gray-700 hover:text-blue-300 transition dropdown-text">💾 Guardar Todo</button>
-          <button id="cargarTodoBtn" class="w-full text-left px-4 py-2 hover:bg-gray-700 hover:text-blue-300 transition dropdown-text">📂 Cargar Todo</button>
-        </div>
+        <button class="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mb-2" onclick="createBackup()">
+          💾 Crear Backup
+        </button>
+        <button class="w-full bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 mb-2" onclick="restoreBackup()">
+          📂 Restaurar Backup
+        </button>
+        <p class="text-xs text-gray-400 mt-2">Última sincronización: <span id="lastSync">Nunca</span></p>
       </div>
-      
-      <a href="alumnos.html" id="alumnosNavBtn" class="sidebar-btn">Gestión de alumnos</a>
-      <a href="Organizador de Horarios Personal/Organizador de Horarios Personal.html" id="horariosNavBtn" class="sidebar-btn">Organizador de Horarios</a>
-      <a href="gestor-financiero.html" class="sidebar-btn">Gestor Financiero</a>
-      <button id="reportesBtn" class="sidebar-btn text-left">Reportes</button>
-      <input type="file" id="importFileInput" accept="application/json" class="hidden" />
-      <input type="file" id="cargarTodoInput" accept="application/json" class="hidden" />
     </div>
   </nav>
-  
-  <!-- Header con selectores -->
-  <header class="bg-white shadow-sm border-b border-gray-200" style="margin-left:12rem;">
-    <div class="max-w-7xl mx-auto px-4 py-4">
-      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <!-- Título del dashboard -->
-        <div class="flex items-center">
-          <h1 class="text-2xl font-bold text-gray-800">Panel de Gestión</h1>
-          <span class="ml-3 px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded-full font-medium" id="currentYearBadge">2024</span>
+
+  <!-- Contenido principal -->
+  <div class="main-content ml-48 p-6">
+    <!-- Header -->
+    <header class="mb-6">
+      <h1 class="text-3xl font-bold text-gray-800">Dashboard de Clases</h1>
+      <p class="text-gray-600">Sistema completo de gestión</p>
+    </header>
+
+    <!-- Sección Dashboard -->
+    <div id="dashboard-section" class="space-y-6">
+      <!-- Estadísticas rápidas -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white p-6 rounded-lg shadow">
+          <div class="flex items-center">
+            <div class="p-2 bg-blue-100 rounded-lg">
+              <span class="text-2xl">👥</span>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm text-gray-600">Total Alumnos</p>
+              <p class="text-2xl font-bold" id="totalAlumnos">0</p>
+            </div>
+          </div>
         </div>
         
-        <!-- Controles principales -->
-        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-          <!-- Selector de meses -->
-          <div class="flex items-center gap-2">
-            <label for="monthDropdown" class="text-sm font-medium text-gray-700 whitespace-nowrap">Meses a mostrar:</label>
-            <div class="relative" id="monthDropdownWrapper">
-              <button id="monthDropdownBtn" class="border border-gray-300 rounded-lg px-3 py-2 w-48 bg-white flex items-center justify-between text-sm hover:border-gray-400 transition-colors">
-                <span id="monthDropdownLabel">Seleccionar meses</span>
-                <svg class="w-4 h-4 ml-2 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-              </button>
-              <div id="monthDropdownMenu" class="absolute left-0 mt-1 w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-30 hidden max-h-64 overflow-y-auto">
-                <!-- Opciones generadas por JS -->
-              </div>
+        <div class="bg-white p-6 rounded-lg shadow">
+          <div class="flex items-center">
+            <div class="p-2 bg-green-100 rounded-lg">
+              <span class="text-2xl">📅</span>
             </div>
-          </div>
-          
-          <!-- Selector de período anual -->
-          <div class="flex items-center gap-2">
-            <label for="annualPeriodDropdown" class="text-sm font-medium text-gray-700 whitespace-nowrap">Período anual:</label>
-            <div class="relative" id="annualPeriodDropdownWrapper">
-              <button id="annualPeriodDropdownBtn" class="border border-gray-300 rounded-lg px-3 py-2 w-48 bg-white flex items-center justify-between text-sm hover:border-gray-400 transition-colors">
-                <span id="annualPeriodDropdownLabel">Junio - Noviembre</span>
-                <svg class="w-4 h-4 ml-2 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-              </button>
-              <div id="annualPeriodDropdownMenu" class="absolute left-0 mt-1 w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-30 hidden max-h-64 overflow-y-auto">
-                <!-- Opciones generadas por JS -->
-              </div>
+            <div class="ml-4">
+              <p class="text-sm text-gray-600">Clases Esta Semana</p>
+              <p class="text-2xl font-bold" id="clasesSemana">0</p>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  </header>
-  
-  <div style="margin-left:12rem;">
-    <!-- Modal de registro de institución -->
-    <div id="modalBg" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-30 hidden">
-      <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative overflow-y-auto max-h-[90vh]">
-        <button id="closeModalBtn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-gray-700">&times;</button>
-        <h2 class="text-lg font-bold mb-4">Registrar institución</h2>
-        <form id="institutionForm" class="space-y-4">
-          <div>
-            <label class="block font-semibold mb-1">Nombre de la institución</label>
-            <input type="text" id="instName" required class="w-full border rounded px-2 py-1" />
-          </div>
-          <div>
-            <label class="block font-semibold mb-1">Valor general de la clase</label>
-            <input type="number" id="instValue" min="1" required class="w-full border rounded px-2 py-1" />
-          </div>
-          <div>
-            <label class="block font-semibold mb-1">Costo de pasaje por clase</label>
-            <input type="number" id="instPasaje" min="0" required class="w-full border rounded px-2 py-1" />
-          </div>
-          <div>
-            <label class="block font-semibold mb-1">Días de clase</label>
-            <select id="instDays" multiple size="7" required class="w-full border rounded px-2 py-1">
-              <option value="1">Lunes</option>
-              <option value="2">Martes</option>
-              <option value="3">Miércoles</option>
-              <option value="4">Jueves</option>
-              <option value="5">Viernes</option>
-              <option value="6">Sábado</option>
-              <option value="0">Domingo</option>
-            </select>
-            <span class="text-gray-500 text-xs">(Ctrl+Click para seleccionar varios)</span>
-          </div>
-          <div class="flex items-center mb-2">
-            <input type="checkbox" id="instPersonalizarDias" class="mr-2" />
-            <label for="instPersonalizarDias" class="text-sm">Personalizar días a trabajar por mes</label>
-          </div>
-          <div>
-            <label class="block font-semibold mb-1">Días a trabajar por mes</label>
-            <input type="number" id="instDiasTrabajar" min="1" max="31" value="" disabled required class="w-full border rounded px-2 py-1" />
-            <span class="text-gray-500 text-xs">Por defecto se calcula automáticamente según los días seleccionados y el mes.</span>
-          </div>
-          <div class="flex items-center mb-2">
-            <input type="checkbox" id="instRequiereBoleta" class="mr-2" />
-            <label for="instRequiereBoleta" class="text-sm">Requiere boleta (aplica descuentos BPS 15% y Fondo Cooperativa 10%)</label>
-          </div>
-          <div class="flex justify-end">
-            <button type="submit" class="bg-blue-700 text-white px-4 py-1 rounded hover:bg-blue-800 transition">Agregar</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Modal de panel de control de instituciones -->
-    <div id="institutionsPanelModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-40 hidden">
-      <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-2xl relative">
-        <button id="closeInstitutionsPanelBtn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-gray-700">&times;</button>
-        <h2 class="text-lg font-bold mb-4">Panel de Instituciones</h2>
-        <div class="flex justify-end mb-2">
-          <button id="openModalBtn2" class="bg-blue-700 text-white px-3 py-1 rounded hover:bg-blue-800 transition">Agregar institución</button>
-        </div>
-        <div id="institutionsList" class="overflow-x-auto"></div>
-      </div>
-    </div>
-
-    <!-- Dashboard de meses e instituciones -->
-    <div id="dashboard" class="max-w-7xl mx-auto mt-8 px-4"></div>
-
-    <!-- Resumen Anual -->
-    <div id="annualSummary" class="max-w-7xl mx-auto mt-8 px-4"></div>
-
-    <!-- Gráficas y resumen anual -->
-    <div id="chartsSection" class="max-w-7xl mx-auto mt-8 px-4">
-      <div class="flex items-center justify-between mb-2">
-        <h2 class="text-lg font-bold">Gráficas de Ingresos, Egresos y Saldo</h2>
-        <button id="toggleChartsBtn" class="text-blue-700 font-semibold px-3 py-1 rounded hover:bg-blue-100 transition">Ocultar/Mostrar</button>
-      </div>
-      <div id="chartsContainer">
-        <canvas id="mainChart" height="60"></canvas>
-      </div>
-    </div>
-
-    <!-- Gráfico de Ingreso vs Egreso (Pasajes y Aportes) -->
-    <div id="ingresoVsEgresoSection" class="max-w-7xl mx-auto mt-8 px-4">
-      <div class="flex items-center justify-between mb-2">
-        <h2 class="text-lg font-bold">Ingreso vs Egreso (Pasajes y Aportes)</h2>
-        <button id="toggleIngresoVsEgresoBtn" class="text-blue-700 font-semibold px-3 py-1 rounded hover:bg-blue-100 transition">Ocultar/Mostrar</button>
-      </div>
-      <div id="ingresoVsEgresoContainer">
-        <canvas id="ingresoVsEgresoChart" height="60"></canvas>
-      </div>
-    </div>
-
-    <!-- Modal para agregar día extra -->
-    <div id="extraDayModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
-      <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-sm relative">
-        <button id="closeExtraDayModalBtn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-gray-700">&times;</button>
-        <h2 class="text-lg font-bold mb-4">Agregar día extra</h2>
-        <form id="extraDayForm" class="space-y-4">
-          <div>
-            <label class="block font-semibold mb-1">Fecha</label>
-            <input type="date" id="extraDayDate" required class="w-full border rounded px-2 py-1" />
-          </div>
-          <div>
-            <label class="block font-semibold mb-1">Valor de la clase</label>
-            <input type="number" id="extraDayValue" min="1" required class="w-full border rounded px-2 py-1" />
-          </div>
-          <div class="flex justify-end">
-            <button type="submit" class="bg-blue-700 text-white px-4 py-1 rounded hover:bg-blue-800 transition">Agregar</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Modal de reportes mensuales -->
-    <div id="reportesModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
-      <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-2xl relative">
-        <button id="closeReportesModalBtn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-gray-700">&times;</button>
-        <h2 class="text-lg font-bold mb-4">Reporte mensual de ingresos y pasajes</h2>
-        <!-- Gráficas de aportes y gastos -->
-        <div class="flex flex-col md:flex-row gap-6 mb-6">
-          <div class="flex-1">
-            <h3 class="text-base font-semibold text-blue-700 mb-2">Aportes</h3>
-            <canvas id="aportesChart" height="120"></canvas>
-          </div>
-          <div class="flex-1">
-            <h3 class="text-base font-semibold text-rose-700 mb-2">Gastos</h3>
-            <canvas id="gastosChart" height="120"></canvas>
+        
+        <div class="bg-white p-6 rounded-lg shadow">
+          <div class="flex items-center">
+            <div class="p-2 bg-yellow-100 rounded-lg">
+              <span class="text-2xl">💰</span>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm text-gray-600">Ingresos del Mes</p>
+              <p class="text-2xl font-bold" id="ingresosMes">$0</p>
+            </div>
           </div>
         </div>
-        <div class="overflow-x-auto">
-          <table class="min-w-full text-sm text-left border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-            <thead class="bg-gray-50 sticky top-0 z-10">
-              <tr>
-                <th class="py-2 px-3 font-bold text-gray-700 border-b">Mes</th>
-                <th class="py-2 px-3 font-bold text-green-700 border-b">Ingreso real</th>
-                <th class="py-2 px-3 font-bold text-rose-700 border-b">Gasto de pasajes real</th>
-                <th class="py-2 px-3 font-bold text-blue-700 border-b">Descuentos BPS (15%)</th>
-                <th class="py-2 px-3 font-bold text-blue-700 border-b">Descuentos Fondo Coop (10%)</th>
-                <th class="py-2 px-3 font-bold text-blue-900 border-b">Total descuentos (25%)</th>
-              </tr>
-            </thead>
-            <tbody id="reportesTableBody" class="divide-y divide-gray-100"></tbody>
-          </table>
+        
+        <div class="bg-white p-6 rounded-lg shadow">
+          <div class="flex items-center">
+            <div class="p-2 bg-purple-100 rounded-lg">
+              <span class="text-2xl">📊</span>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm text-gray-600">Asistencia Promedio</p>
+              <p class="text-2xl font-bold" id="asistenciaPromedio">0%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráficos -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-lg shadow">
+          <h3 class="text-lg font-semibold mb-4">Asistencia Mensual</h3>
+          <canvas id="asistenciaChart" width="400" height="200"></canvas>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow">
+          <h3 class="text-lg font-semibold mb-4">Ingresos por Mes</h3>
+          <canvas id="ingresosChart" width="400" height="200"></canvas>
+        </div>
+      </div>
+
+      <!-- Próximas clases -->
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h3 class="text-lg font-semibold mb-4">Próximas Clases</h3>
+        <div id="proximasClases" class="space-y-2">
+          <!-- Se llena dinámicamente -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección Alumnos -->
+    <div id="alumnos-section" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-2xl font-bold mb-4">Gestión de Alumnos</h2>
+        <a href="alumnos.html" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+          Ir a Gestión de Alumnos
+        </a>
+      </div>
+    </div>
+
+    <!-- Sección Horarios -->
+    <div id="horarios-section" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-2xl font-bold mb-4">Organizador de Horarios</h2>
+        <a href="Organizador de Horarios Personal/Organizador de Horarios Personal.html" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700">
+          Ir al Organizador
+        </a>
+      </div>
+    </div>
+
+    <!-- Sección Finanzas -->
+    <div id="finanzas-section" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-2xl font-bold mb-4">Gestor Financiero</h2>
+        <a href="gestor-financiero.html" class="bg-yellow-600 text-white px-6 py-3 rounded-lg hover:bg-yellow-700">
+          Ir al Gestor Financiero
+        </a>
+      </div>
+    </div>
+
+    <!-- Sección Reportes -->
+    <div id="reportes-section" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-2xl font-bold mb-4">Generar Reportes</h2>
+        <div class="space-y-4">
+          <button onclick="generarReporteMensual()" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700">
+            📊 Reporte Mensual
+          </button>
+          <button onclick="generarReporteAnual()" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700">
+            📈 Reporte Anual
+          </button>
         </div>
       </div>
     </div>
   </div>
 
-  <div id="alumnosPage" class="hidden px-4 py-6">
-    <button id="volverDashboardBtn" class="mb-4 bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-900">Volver al panel principal</button>
-    <h1 class="text-2xl font-bold mb-4">Gestión de alumnos</h1>
-    <!-- Aquí irá el contenido de la nueva sección -->
-  </div>
-
-  <script src="alumnos.js"></script>
   <script>
-    // --- Manejo del desplegable de institución ---
+    // Variables globales
+    let currentSection = 'dashboard';
+    let chartInstances = {};
+    
+    // Datos de ejemplo (en producción esto vendría de localStorage o API)
+    let dashboardData = {
+      totalAlumnos: 0,
+      clasesSemana: 0,
+      ingresosMes: 0,
+      asistenciaPromedio: 0,
+      proximasClases: []
+    };
+
+    // Inicialización
     document.addEventListener('DOMContentLoaded', function() {
-      const institucionDropdownBtn = document.getElementById('institucionDropdownBtn');
-      const institucionDropdownMenu = document.getElementById('institucionDropdownMenu');
-      const institucionDropdownIcon = document.getElementById('institucionDropdownIcon');
+      console.log('Dashboard cargando...');
+      loadData();
+      updateDashboard();
+      initializeCharts();
+      showSection('dashboard');
       
-      if (institucionDropdownBtn) {
-        institucionDropdownBtn.onclick = function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          const isOpen = !institucionDropdownMenu.classList.contains('hidden');
-          
-          if (isOpen) {
-            institucionDropdownMenu.classList.add('hidden');
-            institucionDropdownIcon.style.transform = 'rotate(0deg)';
-          } else {
-            institucionDropdownMenu.classList.remove('hidden');
-            institucionDropdownIcon.style.transform = 'rotate(180deg)';
-          }
-        };
-        
-        // Cerrar al hacer clic fuera
-        document.addEventListener('click', function(e) {
-          if (!institucionDropdownBtn.contains(e.target) && !institucionDropdownMenu.contains(e.target)) {
-            institucionDropdownMenu.classList.add('hidden');
-            institucionDropdownIcon.style.transform = 'rotate(0deg)';
-          }
-        });
-      }
-      
-      // Manejo del desplegable de Guardar/Abrir
-      const guardarAbrirDropdownBtn = document.getElementById('guardarAbrirDropdownBtn');
-      const guardarAbrirDropdownMenu = document.getElementById('guardarAbrirDropdownMenu');
-      const guardarAbrirDropdownIcon = document.getElementById('guardarAbrirDropdownIcon');
-      
-      if (guardarAbrirDropdownBtn) {
-        guardarAbrirDropdownBtn.onclick = function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          const isOpen = !guardarAbrirDropdownMenu.classList.contains('hidden');
-          
-          if (isOpen) {
-            guardarAbrirDropdownMenu.classList.add('hidden');
-            guardarAbrirDropdownIcon.style.transform = 'rotate(0deg)';
-          } else {
-            guardarAbrirDropdownMenu.classList.remove('hidden');
-            guardarAbrirDropdownIcon.style.transform = 'rotate(180deg)';
-          }
-        };
-        
-        // Cerrar al hacer clic fuera
-        document.addEventListener('click', function(e) {
-          if (!guardarAbrirDropdownBtn.contains(e.target) && !guardarAbrirDropdownMenu.contains(e.target)) {
-            guardarAbrirDropdownMenu.classList.add('hidden');
-            guardarAbrirDropdownIcon.style.transform = 'rotate(0deg)';
-          }
-        });
-      }
-    });
-
-    // --- Utilidades y constantes ---
-    const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-    const dayNames = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-    const colorPalette = [
-      "bg-blue-50",
-      "bg-green-50",
-      "bg-purple-50",
-      "bg-cyan-50",
-      "bg-gray-50",
-      "bg-amber-50"
-    ];
-    const borderPalette = [
-      "border-blue-100",
-      "border-green-100",
-      "border-purple-100",
-      "border-cyan-100",
-      "border-gray-100",
-      "border-amber-100"
-    ];
-    const chartColors = {
-      ingresos: "#22c55e",
-      egresos: "#ef4444",
-      saldo: "#334155",
-      proyeccion: "#3b82f6"
-    };
-
-    // --- Funciones de cálculo de descuentos ---
-    function calcularDescuentosBPS(ingreso) {
-      return ingreso * 0.15; // 15% BPS
-    }
-    
-    function calcularDescuentosFondoCoop(ingreso) {
-      return ingreso * 0.10; // 10% Fondo Cooperativa
-    }
-    
-    function calcularDescuentosTotales(ingreso) {
-      return calcularDescuentosBPS(ingreso) + calcularDescuentosFondoCoop(ingreso); // 25% total
-    }
-    
-    function calcularSaldoConDescuentos(ingreso, egresos, requiereBoleta) {
-      if (requiereBoleta) {
-        const descuentos = calcularDescuentosTotales(ingreso);
-        return ingreso - egresos - descuentos;
-      }
-      return ingreso - egresos;
-    }
-
-    // --- Estado global ---
-    let institutions = [];
-    let attendance = {}; // { instId: { 'YYYY-MM-DD': {status: 'ok'|'x', value: number} } }
-    let selectedMonths = [new Date().getMonth()];
-    let currentYear = new Date().getFullYear();
-    let annualReportPeriod = [5, 6, 7, 8, 9, 10]; // Por defecto: Junio a Noviembre (0-indexed)
-
-    // --- Persistencia local ---
-    function saveToLocal() {
-      localStorage.setItem('clases_institutions', JSON.stringify(institutions));
-      localStorage.setItem('clases_attendance', JSON.stringify(attendance));
-      localStorage.setItem('clases_selectedMonths', JSON.stringify(selectedMonths));
-      localStorage.setItem('clases_currentYear', JSON.stringify(currentYear));
-      localStorage.setItem('clases_annualReportPeriod', JSON.stringify(annualReportPeriod));
-    }
-    function loadFromLocal() {
-      const inst = localStorage.getItem('clases_institutions');
-      const att = localStorage.getItem('clases_attendance');
-      const selMonths = localStorage.getItem('clases_selectedMonths');
-      const year = localStorage.getItem('clases_currentYear');
-      const period = localStorage.getItem('clases_annualReportPeriod');
-      if (inst) institutions = JSON.parse(inst);
-      if (att) attendance = JSON.parse(att);
-      if (selMonths) selectedMonths = JSON.parse(selMonths);
-      if (year) currentYear = JSON.parse(year);
-      if (period) annualReportPeriod = JSON.parse(period);
-    }
-
-    // --- Actualizar badge del año en el header ---
-    function updateYearBadge() {
-      const badge = document.getElementById('currentYearBadge');
-      if (badge) {
-        badge.textContent = currentYear;
-      }
-    }
-
-    // --- Modal ---
-    const modalBg = document.getElementById('modalBg');
-    document.getElementById('openModalBtn').onclick = () => { modalBg.classList.remove('hidden'); };
-    document.getElementById('closeModalBtn').onclick = () => { modalBg.classList.add('hidden'); };
-    modalBg.onclick = (e) => { if (e.target === modalBg) modalBg.classList.add('hidden'); };
-
-    // --- Dropdown de selección de meses con checkboxes ---
-    const monthDropdownBtn = document.getElementById('monthDropdownBtn');
-    const monthDropdownMenu = document.getElementById('monthDropdownMenu');
-    const monthDropdownLabel = document.getElementById('monthDropdownLabel');
-    function renderMonthDropdown() {
-      monthDropdownMenu.innerHTML = '';
-      monthNames.forEach((m, i) => {
-        const div = document.createElement('div');
-        div.className = 'flex items-center px-3 py-1 hover:bg-blue-50';
-        const cb = document.createElement('input');
-        cb.type = 'checkbox';
-        cb.checked = selectedMonths.includes(i);
-        cb.className = 'mr-2';
-        cb.onchange = () => {
-          if (cb.checked) {
-            if (!selectedMonths.includes(i)) selectedMonths.push(i);
-          } else {
-            selectedMonths = selectedMonths.filter(x => x !== i);
-            if (selectedMonths.length === 0) selectedMonths = [i]; // Siempre al menos uno
-          }
-          renderMonthDropdown();
-          renderDashboard();
-          renderChartsAndSummary();
-          saveToLocal();
-        };
-        div.appendChild(cb);
-        const label = document.createElement('span');
-        label.textContent = m;
-        div.appendChild(label);
-        monthDropdownMenu.appendChild(div);
-      });
-      // Actualizar label
-      if (selectedMonths.length === 12) {
-        monthDropdownLabel.textContent = 'Todos los meses';
-      } else if (selectedMonths.length === 1) {
-        monthDropdownLabel.textContent = monthNames[selectedMonths[0]];
-      } else {
-        monthDropdownLabel.textContent = selectedMonths.map(i => monthNames[i]).join(', ');
-      }
-    }
-    monthDropdownBtn.onclick = (e) => {
-      e.stopPropagation();
-      monthDropdownMenu.classList.toggle('hidden');
-    };
-    document.body.onclick = () => {
-      monthDropdownMenu.classList.add('hidden');
-    };
-    monthDropdownMenu.onclick = (e) => {
-      e.stopPropagation();
-    };
-
-    // --- Dropdown de selección de período para reporte anual ---
-    const annualPeriodDropdownBtn = document.getElementById('annualPeriodDropdownBtn');
-    const annualPeriodDropdownMenu = document.getElementById('annualPeriodDropdownMenu');
-    const annualPeriodDropdownLabel = document.getElementById('annualPeriodDropdownLabel');
-    
-    function renderAnnualPeriodDropdown() {
-      annualPeriodDropdownMenu.innerHTML = '';
-      
-      // Opciones predefinidas
-      const predefinedPeriods = [
-        { name: 'Enero - Diciembre', months: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] },
-        { name: 'Enero - Junio', months: [0, 1, 2, 3, 4, 5] },
-        { name: 'Julio - Diciembre', months: [6, 7, 8, 9, 10, 11] },
-        { name: 'Marzo - Noviembre', months: [2, 3, 4, 5, 6, 7, 8, 9, 10] },
-        { name: 'Junio - Noviembre', months: [5, 6, 7, 8, 9, 10] },
-        { name: 'Abril - Octubre', months: [3, 4, 5, 6, 7, 8, 9] }
-      ];
-      
-      predefinedPeriods.forEach(period => {
-        const div = document.createElement('div');
-        div.className = 'flex items-center px-3 py-1 hover:bg-blue-50 cursor-pointer';
-        const cb = document.createElement('input');
-        cb.type = 'radio';
-        cb.name = 'annualPeriod';
-        cb.checked = JSON.stringify(annualReportPeriod) === JSON.stringify(period.months);
-        cb.className = 'mr-2';
-        cb.onchange = () => {
-          annualReportPeriod = period.months;
-          renderAnnualPeriodDropdown();
-          renderChartsAndSummary();
-          saveToLocal();
-        };
-        div.appendChild(cb);
-        const label = document.createElement('span');
-        label.textContent = period.name;
-        div.appendChild(label);
-        annualPeriodDropdownMenu.appendChild(div);
-      });
-      
-      // Actualizar label
-      const selectedPeriod = predefinedPeriods.find(p => JSON.stringify(p.months) === JSON.stringify(annualReportPeriod));
-      if (selectedPeriod) {
-        annualPeriodDropdownLabel.textContent = selectedPeriod.name;
-      } else {
-        // Si no coincide con ningún período predefinido, mostrar meses personalizados
-        const monthNames = annualReportPeriod.map(m => monthNames[m]).join(', ');
-        annualPeriodDropdownLabel.textContent = monthNames;
-      }
-    }
-    
-    annualPeriodDropdownBtn.onclick = (e) => {
-      e.stopPropagation();
-      annualPeriodDropdownMenu.classList.toggle('hidden');
-    };
-    
-    document.body.onclick = () => {
-      annualPeriodDropdownMenu.classList.add('hidden');
-    };
-    
-    annualPeriodDropdownMenu.onclick = (e) => {
-      e.stopPropagation();
-    };
-
-    // --- Registro de institución ---
-    document.getElementById('institutionForm').onsubmit = function(e) {
-      e.preventDefault();
-      const name = document.getElementById('instName').value.trim();
-      const value = parseInt(document.getElementById('instValue').value);
-      const pasaje = parseInt(document.getElementById('instPasaje').value);
-      const dias_a_trabajar = parseInt(document.getElementById('instDiasTrabajar').value);
-      const days = Array.from(document.getElementById('instDays').selectedOptions).map(opt => opt.value);
-      const personalizarDias = document.getElementById('instPersonalizarDias').checked;
-      const requiereBoleta = document.getElementById('instRequiereBoleta').checked;
-      if (!name || !value || days.length === 0) return;
-      if (editingInstitutionIdx !== null) {
-        institutions[editingInstitutionIdx] = { ...institutions[editingInstitutionIdx], name, value, pasaje, days, dias_a_trabajar, personalizarDias, requiereBoleta };
-      } else {
-        const id = 'inst' + (institutions.length + 1) + '_' + Date.now();
-        institutions.push({ id, name, value, pasaje, days, dias_a_trabajar, personalizarDias, requiereBoleta });
-      }
-      document.getElementById('institutionForm').reset();
-      modalBg.classList.add('hidden');
-      renderInstitutionsPanel();
-      renderDashboard();
-      renderChartsAndSummary();
-      saveToLocal();
-    };
-
-    // --- Generar los meses del año ---
-    function getMonthsOfYear(year) {
-      let months = [];
-      for (let m = 0; m < 12; m++) {
-        let days = [];
-        let date = new Date(year, m, 1);
-        while (date.getMonth() === m) {
-          days.push({
-            date: new Date(date),
-            day: date.getDay(),
-            dayNum: date.getDate()
-          });
-          date.setDate(date.getDate() + 1);
-        }
-        months.push({
-          name: monthNames[m],
-          number: m,
-          days
-        });
-      }
-      return months;
-    }
-
-    // --- Renderizar dashboard ---
-    function renderDashboard() {
-      const months = getMonthsOfYear(currentYear);
-      const dashboard = document.getElementById('dashboard');
-      dashboard.innerHTML = '';
-      selectedMonths.sort((a, b) => a - b).forEach((monthIdx) => {
-        const month = months[monthIdx];
-        // Título del mes
-        const monthTitle = document.createElement('h2');
-        monthTitle.className = 'text-xl font-bold mb-2 mt-8';
-        monthTitle.textContent = month.name;
-        dashboard.appendChild(monthTitle);
-        // Grid de instituciones
-        const grid = document.createElement('div');
-        grid.className = 'grid md:grid-cols-' + Math.max(1, institutions.length) + ' gap-6';
-        institutions.forEach((inst, idx) => {
-          const color = colorPalette[idx % colorPalette.length];
-          const border = borderPalette[idx % borderPalette.length];
-          // Card de institución
-          const card = document.createElement('div');
-          card.className = `rounded-lg shadow border ${border} ${color} p-4 flex flex-col`;
-          // Header
-          card.innerHTML = `<div class="flex items-center justify-between mb-2">
-            <span class="font-bold text-lg">${inst.name}</span>
-            <span class="text-xs text-gray-500">($${inst.value} clase)</span>
-          </div>`;
-          // Calendario minimalista
-          const classDays = inst.days.map(Number);
-          const filteredDays = month.days.filter(d => classDays.includes(d.day));
-          let extraDays = inst.extraDays ? inst.extraDays.filter(ed => ed.year === currentYear && ed.month === month.number) : [];
-          let proyeccion = getDiasTrabajar(inst, month.number, currentYear) * inst.value;
-          let ingresoReal = 0, egresos = 0;
-          const calendar = document.createElement('div');
-          calendar.className = 'flex flex-col gap-1';
-          if (filteredDays.length === 0) {
-            calendar.innerHTML = '<span class="text-gray-400 text-sm">No hay clases este mes</span>';
-          } else {
-            filteredDays.forEach(d => {
-              const dateStr = `${currentYear}-${String(month.number+1).padStart(2,'0')}-${String(d.dayNum).padStart(2,'0')}`;
-              if (!attendance[inst.id]) attendance[inst.id] = {};
-              if (!attendance[inst.id][dateStr]) attendance[inst.id][dateStr] = {status: '', value: inst.value};
-              // Fila de clase
-              const row = document.createElement('div');
-              row.className = 'flex items-center gap-2';
-              // Checkbox triple estado
-              const cb = document.createElement('input');
-              cb.type = 'checkbox';
-              cb.checked = attendance[inst.id][dateStr].status === 'ok';
-              cb.indeterminate = attendance[inst.id][dateStr].status === 'x';
-              cb.onclick = () => {
-                if (attendance[inst.id][dateStr].status === '') {
-                  attendance[inst.id][dateStr].status = 'ok';
-                } else if (attendance[inst.id][dateStr].status === 'ok') {
-                  attendance[inst.id][dateStr].status = 'x';
-                } else {
-                  attendance[inst.id][dateStr].status = '';
-                }
-                renderDashboard();
-                renderChartsAndSummary();
-                saveToLocal();
-              };
-              // Valor editable
-              const valorInput = document.createElement('input');
-              valorInput.type = 'number';
-              valorInput.value = attendance[inst.id][dateStr].value;
-              valorInput.min = 0;
-              valorInput.className = 'w-20 px-1 py-0.5 rounded border';
-              valorInput.onchange = () => {
-                attendance[inst.id][dateStr].value = parseInt(valorInput.value) || 0;
-                renderDashboard();
-                renderChartsAndSummary();
-                saveToLocal();
-              };
-              // Fecha
-              const fechaTxt = `${dayNames[d.day]} ${String(d.dayNum).padStart(2,'0')}/${String(month.number+1).padStart(2,'0')}`;
-              // Suma a ingreso real solo si está en 'ok'
-              if (attendance[inst.id][dateStr].status === 'ok') {
-                ingresoReal += attendance[inst.id][dateStr].value;
-                egresos += inst.pasaje;
-              }
-              // Fila
-              row.innerHTML = '';
-              row.appendChild(cb);
-              const span = document.createElement('span');
-              span.textContent = fechaTxt;
-              row.appendChild(span);
-              row.appendChild(valorInput);
-              calendar.appendChild(row);
-            });
-          }
-          // Totales y proyección
-          const saldoReal = ingresoReal - egresos;
-          const saldoConDescuentos = calcularSaldoConDescuentos(ingresoReal, egresos, inst.requiereBoleta);
-          const descuentosBPS = inst.requiereBoleta ? calcularDescuentosBPS(ingresoReal) : 0;
-          const descuentosFondoCoop = inst.requiereBoleta ? calcularDescuentosFondoCoop(ingresoReal) : 0;
-          const descuentosTotales = inst.requiereBoleta ? calcularDescuentosTotales(ingresoReal) : 0;
-          
-          card.appendChild(calendar);
-          // Bloque de totales debajo del calendario
-          const totalesDiv = document.createElement('div');
-          totalesDiv.className = 'flex flex-col gap-1 mt-2';
-          
-          let totalesHTML = `
-            <span class="inline-block bg-blue-100 text-blue-900 rounded px-2 py-0.5 text-xs font-semibold flex justify-between">Proyección: <span>$${proyeccion}</span></span>
-            <span class="inline-block bg-green-100 text-green-900 rounded px-2 py-0.5 text-xs font-semibold flex justify-between">Ingreso real: <span>$${ingresoReal}</span></span>
-            <span class="inline-block bg-red-100 text-red-900 rounded px-2 py-0.5 text-xs font-semibold flex justify-between">Gasto pasajes: <span>$${egresos}</span></span>
-          `;
-          
-          if (inst.requiereBoleta && ingresoReal > 0) {
-            totalesHTML += `
-              <span class="inline-block bg-orange-100 text-orange-900 rounded px-2 py-0.5 text-xs font-semibold flex justify-between">Descuento BPS (15%): <span>$${descuentosBPS}</span></span>
-              <span class="inline-block bg-purple-100 text-purple-900 rounded px-2 py-0.5 text-xs font-semibold flex justify-between">Descuento Fondo Coop (10%): <span>$${descuentosFondoCoop}</span></span>
-              <span class="inline-block bg-yellow-100 text-yellow-900 rounded px-2 py-0.5 text-xs font-semibold flex justify-between">Total descuentos (25%): <span>$${descuentosTotales}</span></span>
-            `;
-          }
-          
-          totalesHTML += `<span class="inline-block bg-gray-100 text-gray-900 rounded px-2 py-0.5 text-xs font-semibold flex justify-between">Saldo real: <span>$${saldoConDescuentos}</span></span>`;
-          
-          totalesDiv.innerHTML = totalesHTML;
-          card.appendChild(totalesDiv);
-          // Días extra para este mes
-          extraDays = inst.extraDays ? inst.extraDays.filter(ed => ed.year === currentYear && ed.month === month.number) : [];
-          // Renderizar días extra
-          extraDays.forEach((ed, edIdx) => {
-            const dateStr = `${ed.year}-${String(ed.month+1).padStart(2,'0')}-${String(ed.day).padStart(2,'0')}`;
-            if (!attendance[inst.id]) attendance[inst.id] = {};
-            if (!attendance[inst.id][dateStr]) attendance[inst.id][dateStr] = {status: '', value: ed.value};
-            // Fila de clase extra
-            const row = document.createElement('div');
-            row.className = 'flex items-center gap-2';
-            const cb = document.createElement('input');
-            cb.type = 'checkbox';
-            cb.checked = attendance[inst.id][dateStr].status === 'ok';
-            cb.indeterminate = attendance[inst.id][dateStr].status === 'x';
-            cb.onclick = () => {
-              if (attendance[inst.id][dateStr].status === '') {
-                attendance[inst.id][dateStr].status = 'ok';
-              } else if (attendance[inst.id][dateStr].status === 'ok') {
-                attendance[inst.id][dateStr].status = 'x';
-              } else {
-                attendance[inst.id][dateStr].status = '';
-              }
-              renderDashboard();
-              renderChartsAndSummary();
-              saveToLocal();
-            };
-            // Valor editable
-            const valorInput = document.createElement('input');
-            valorInput.type = 'number';
-            valorInput.value = attendance[inst.id][dateStr].value;
-            valorInput.min = 0;
-            valorInput.className = 'w-20 px-1 py-0.5 rounded border';
-            valorInput.onchange = () => {
-              attendance[inst.id][dateStr].value = parseInt(valorInput.value) || 0;
-              renderDashboard();
-              renderChartsAndSummary();
-              saveToLocal();
-            };
-            // Fecha
-            const fechaTxt = `Extra: ${String(ed.day).padStart(2,'0')}/${String(ed.month+1).padStart(2,'0')}`;
-            // Suma a ingreso real solo si está en 'ok'
-            if (attendance[inst.id][dateStr].status === 'ok') {
-              ingresoReal += attendance[inst.id][dateStr].value;
-              egresos += inst.pasaje;
-            }
-            row.appendChild(cb);
-            const span = document.createElement('span');
-            span.textContent = fechaTxt;
-            row.appendChild(span);
-            row.appendChild(valorInput);
-            // Botón eliminar
-            const delBtn = document.createElement('button');
-            delBtn.className = 'ml-2 text-xs text-red-600 hover:underline';
-            delBtn.textContent = 'Eliminar';
-            delBtn.onclick = () => {
-              inst.extraDays.splice(inst.extraDays.findIndex(x => x.year === ed.year && x.month === ed.month && x.day === ed.day), 1);
-              renderDashboard();
-              renderChartsAndSummary();
-              saveToLocal();
-            };
-            row.appendChild(delBtn);
-            calendar.appendChild(row);
-          });
-          
-          // Recalcular totales después de procesar las clases extras
-          const saldoRealFinal = ingresoReal - egresos;
-          const saldoConDescuentosFinal = calcularSaldoConDescuentos(ingresoReal, egresos, inst.requiereBoleta);
-          const descuentosBPSFinal = inst.requiereBoleta ? calcularDescuentosBPS(ingresoReal) : 0;
-          const descuentosFondoCoopFinal = inst.requiereBoleta ? calcularDescuentosFondoCoop(ingresoReal) : 0;
-          const descuentosTotalesFinal = inst.requiereBoleta ? calcularDescuentosTotales(ingresoReal) : 0;
-          
-          // Actualizar el bloque de totales con los valores correctos
-          let totalesHTMLFinal = `
-            <span class="inline-block bg-blue-100 text-blue-900 rounded px-2 py-0.5 text-xs font-semibold flex justify-between">Proyección: <span>$${proyeccion}</span></span>
-            <span class="inline-block bg-green-100 text-green-900 rounded px-2 py-0.5 text-xs font-semibold flex justify-between">Ingreso real: <span>$${ingresoReal}</span></span>
-            <span class="inline-block bg-red-100 text-red-900 rounded px-2 py-0.5 text-xs font-semibold flex justify-between">Gasto pasajes: <span>$${egresos}</span></span>
-          `;
-          
-          if (inst.requiereBoleta && ingresoReal > 0) {
-            totalesHTMLFinal += `
-              <span class="inline-block bg-orange-100 text-orange-900 rounded px-2 py-0.5 text-xs font-semibold flex justify-between">Descuento BPS (15%): <span>$${descuentosBPSFinal}</span></span>
-              <span class="inline-block bg-purple-100 text-purple-900 rounded px-2 py-0.5 text-xs font-semibold flex justify-between">Descuento Fondo Coop (10%): <span>$${descuentosFondoCoopFinal}</span></span>
-              <span class="inline-block bg-yellow-100 text-yellow-900 rounded px-2 py-0.5 text-xs font-semibold flex justify-between">Total descuentos (25%): <span>$${descuentosTotalesFinal}</span></span>
-            `;
-          }
-          
-          totalesHTMLFinal += `<span class="inline-block bg-gray-100 text-gray-900 rounded px-2 py-0.5 text-xs font-semibold flex justify-between">Saldo real: <span>$${saldoConDescuentosFinal}</span></span>`;
-          
-          totalesDiv.innerHTML = totalesHTMLFinal;
-          card.appendChild(totalesDiv);
-          // Botón para agregar día extra
-          const addExtraBtn = document.createElement('button');
-          addExtraBtn.className = 'mt-2 bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 transition self-start';
-          addExtraBtn.textContent = 'Agregar día extra';
-          addExtraBtn.onclick = () => openExtraDayModal(idx, month.number);
-          card.appendChild(addExtraBtn);
-          grid.appendChild(card);
-        });
-        dashboard.appendChild(grid);
-      });
-    }
-
-    // --- Gráficas y resumen anual ---
-    let mainChart = null;
-    let ingresoVsEgresoChart = null;
-    function renderChartsAndSummary() {
-      const months = getMonthsOfYear(currentYear);
-      let labels = [];
-      let ingresos = [], egresos = [], saldos = [], proyecciones = [], descuentosBPS = [], descuentosFondoCoop = [], descuentosTotales = [];
-      
-      // Usar el período seleccionado para el reporte anual
-      annualReportPeriod.forEach((m) => {
-        labels.push(monthNames[m]);
-        let proy = 0, ing = 0, egr = 0, descBPS = 0, descFondoCoop = 0, descTotal = 0;
-        const month = months[m];
-        institutions.forEach(inst => {
-          const classDays = inst.days.map(Number);
-          const filteredDays = month.days.filter(d => classDays.includes(d.day));
-          let ingresoMesInst = 0;
-          filteredDays.forEach(d => {
-            const dateStr = `${currentYear}-${String(month.number+1).padStart(2,'0')}-${String(d.dayNum).padStart(2,'0')}`;
-            if (!attendance[inst.id]) attendance[inst.id] = {};
-            if (!attendance[inst.id][dateStr]) attendance[inst.id][dateStr] = {status: '', value: inst.value};
-            proy += getDiasTrabajar(inst, m, currentYear) * inst.value;
-            if (attendance[inst.id][dateStr].status === 'ok') {
-              ingresoMesInst += attendance[inst.id][dateStr].value;
-              egr += inst.pasaje;
-            }
-          });
-          // Días extra
-          if (inst.extraDays) {
-            const extras = inst.extraDays.filter(ed => ed.year === currentYear && ed.month === m);
-            proy += extras.reduce((acc, ed) => acc + ed.value, 0);
-          }
-          ing += ingresoMesInst;
-          // Calcular descuentos si requiere boleta
-          if (inst.requiereBoleta && ingresoMesInst > 0) {
-            descBPS += calcularDescuentosBPS(ingresoMesInst);
-            descFondoCoop += calcularDescuentosFondoCoop(ingresoMesInst);
-            descTotal += calcularDescuentosTotales(ingresoMesInst);
-          }
-        });
-        ingresos.push(ing);
-        egresos.push(egr);
-        saldos.push(ing - egr - descTotal);
-        proyecciones.push(proy);
-        descuentosBPS.push(descBPS);
-        descuentosFondoCoop.push(descFondoCoop);
-        descuentosTotales.push(descTotal);
-      });
-      // Gráfica
-      if (mainChart) mainChart.destroy();
-      const ctx = document.getElementById('mainChart').getContext('2d');
-      mainChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels,
-          datasets: [
-            { label: 'Proyección', data: proyecciones, backgroundColor: chartColors.proyeccion },
-            { label: 'Ingreso real', data: ingresos, backgroundColor: chartColors.ingresos },
-            { label: 'Egresos (pasajes)', data: egresos, backgroundColor: chartColors.egresos },
-            { label: 'Descuentos BPS (15%)', data: descuentosBPS, backgroundColor: '#f97316' },
-            { label: 'Descuentos Fondo Coop (10%)', data: descuentosFondoCoop, backgroundColor: '#a855f7' },
-            { label: 'Saldo real', data: saldos, backgroundColor: chartColors.saldo }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { position: 'top' } },
-          scales: { y: { beginAtZero: true } }
-        }
-      });
-      // Calcular proyección anual y gasto de pasajes anual proyectado SOLO para el período seleccionado
-      let proyeccionAnual = 0;
-      let gastoPasajesProyectado = 0;
-      const monthsAll = getMonthsOfYear(currentYear);
-      annualReportPeriod.forEach(m => {
-        const month = monthsAll[m];
-        institutions.forEach(inst => {
-          proyeccionAnual += getDiasTrabajar(inst, m, currentYear) * inst.value;
-          gastoPasajesProyectado += getDiasTrabajar(inst, m, currentYear) * inst.pasaje;
-          // Días extra eliminados de la proyección
-        });
-      });
-      // Calcular ingresos reales anual, gasto de pasajes real anual y saldo real anual SOLO para el período seleccionado
-      let anualIng = 0, anualEgr = 0, anualSaldo = 0, anualDescuentosBPS = 0, anualDescuentosFondoCoop = 0, anualDescuentosTotales = 0;
-      annualReportPeriod.forEach(m => {
-        const month = monthsAll[m];
-        institutions.forEach(inst => {
-          const classDays = inst.days.map(Number);
-          const filteredDays = month.days.filter(d => classDays.includes(d.day));
-          let ingresoMesInst = 0;
-          filteredDays.forEach(d => {
-            const dateStr = `${currentYear}-${String(month.number+1).padStart(2,'0')}-${String(d.dayNum).padStart(2,'0')}`;
-            if (attendance[inst.id] && attendance[inst.id][dateStr] && attendance[inst.id][dateStr].status === 'ok') {
-              ingresoMesInst += attendance[inst.id][dateStr].value;
-              anualEgr += inst.pasaje;
-            }
-          });
-          // Días extra
-          if (inst.extraDays) {
-            inst.extraDays.filter(ed => ed.year === currentYear && ed.month === m).forEach(ed => {
-              const dateStr = `${ed.year}-${String(ed.month+1).padStart(2,'0')}-${String(ed.day).padStart(2,'0')}`;
-              if (attendance[inst.id] && attendance[inst.id][dateStr] && attendance[inst.id][dateStr].status === 'ok') {
-                ingresoMesInst += attendance[inst.id][dateStr].value;
-                anualEgr += inst.pasaje;
-              }
-            });
-          }
-          anualIng += ingresoMesInst;
-          // Calcular descuentos si requiere boleta
-          if (inst.requiereBoleta && ingresoMesInst > 0) {
-            anualDescuentosBPS += calcularDescuentosBPS(ingresoMesInst);
-            anualDescuentosFondoCoop += calcularDescuentosFondoCoop(ingresoMesInst);
-            anualDescuentosTotales += calcularDescuentosTotales(ingresoMesInst);
-          }
-        });
-      });
-      anualSaldo = anualIng - anualEgr - anualDescuentosTotales;
-      // En el resumen anual, mostrar:
-      // - Proyección anual (sin pasajes)
-      // - Gasto total pasajes anual proyectado
-      // - Proyección anual neta (proyección anual menos gasto total pasajes anual proyectado)
-      // - Ingresos reales
-      // - Gasto total pasajes real
-      // - Saldo real anual
-      
-      // Generar el título del período
-      const periodStart = monthNames[annualReportPeriod[0]];
-      const periodEnd = monthNames[annualReportPeriod[annualReportPeriod.length - 1]];
-      const periodTitle = annualReportPeriod.length === 12 ? 'Enero - Diciembre' : `${periodStart} - ${periodEnd}`;
-      
-      document.getElementById('annualSummary').innerHTML = `
-        <div class="bg-white rounded-lg shadow-lg p-3 mt-4">
-          <h3 class="text-base font-bold text-gray-800 mb-3 text-center">Resumen Anual ${currentYear} (${periodTitle})</h3>
-          
-          <!-- Sección de Proyecciones -->
-          <div class="mb-3">
-            <h4 class="text-xs font-semibold text-blue-800 mb-1 border-b border-blue-200 pb-1">📊 Proyecciones</h4>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-              <div class="bg-blue-50 border border-blue-200 rounded p-2">
-                <div class="text-xs text-blue-600 font-medium">Proyección Total</div>
-                <div class="text-base font-bold text-blue-800">$${proyeccionAnual.toLocaleString()}</div>
-                <div class="text-xs text-blue-500">Sin pasajes</div>
-              </div>
-              <div class="bg-red-50 border border-red-200 rounded p-2">
-                <div class="text-xs text-red-600 font-medium">Pasajes Proyectados</div>
-                <div class="text-base font-bold text-red-800">$${gastoPasajesProyectado.toLocaleString()}</div>
-                <div class="text-xs text-red-500">Costo total</div>
-              </div>
-              <div class="bg-indigo-50 border border-indigo-200 rounded p-2">
-                <div class="text-xs text-indigo-600 font-medium">Proyección Neta</div>
-                <div class="text-base font-bold text-indigo-800">$${(proyeccionAnual - gastoPasajesProyectado).toLocaleString()}</div>
-                <div class="text-xs text-indigo-500">Con descuento pasajes</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Sección de Realidad -->
-          <div class="mb-3">
-            <h4 class="text-xs font-semibold text-green-800 mb-1 border-b border-green-200 pb-1">💰 Realidad</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <div class="bg-green-50 border border-green-200 rounded p-2">
-                <div class="text-xs text-green-600 font-medium">Ingresos Reales</div>
-                <div class="text-base font-bold text-green-800">$${anualIng.toLocaleString()}</div>
-                <div class="text-xs text-green-500">Total percibido</div>
-              </div>
-              <div class="bg-red-50 border border-red-200 rounded p-2">
-                <div class="text-xs text-red-600 font-medium">Pasajes Reales</div>
-                <div class="text-base font-bold text-red-800">$${anualEgr.toLocaleString()}</div>
-                <div class="text-xs text-red-500">Total gastado</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Sección de Descuentos -->
-          ${anualDescuentosTotales > 0 ? `
-          <div class="mb-3">
-            <h4 class="text-xs font-semibold text-orange-800 mb-1 border-b border-orange-200 pb-1">📋 Descuentos por Boleta</h4>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-              <div class="bg-orange-50 border border-orange-200 rounded p-2">
-                <div class="text-xs text-orange-600 font-medium">BPS (15%)</div>
-                <div class="text-base font-bold text-orange-800">$${anualDescuentosBPS.toLocaleString()}</div>
-                <div class="text-xs text-orange-500">Seguridad social</div>
-              </div>
-              <div class="bg-purple-50 border border-purple-200 rounded p-2">
-                <div class="text-xs text-purple-600 font-medium">Fondo Coop (10%)</div>
-                <div class="text-base font-bold text-purple-800">$${anualDescuentosFondoCoop.toLocaleString()}</div>
-                <div class="text-xs text-purple-500">Cooperativa</div>
-              </div>
-              <div class="bg-yellow-50 border border-yellow-200 rounded p-2">
-                <div class="text-xs text-yellow-600 font-medium">Total Descuentos</div>
-                <div class="text-base font-bold text-yellow-800">$${anualDescuentosTotales.toLocaleString()}</div>
-                <div class="text-xs text-yellow-500">25% del ingreso</div>
-              </div>
-            </div>
-          </div>
-          ` : ''}
-
-          <!-- Sección de Saldo Final -->
-          <div class="bg-gray-50 border-2 border-gray-300 rounded p-3">
-            <h4 class="text-xs font-semibold text-gray-800 mb-1 text-center">💵 Saldo Final</h4>
-            <div class="text-center">
-              <div class="text-xl font-bold ${anualSaldo >= 0 ? 'text-green-800' : 'text-red-800'}">
-                $${anualSaldo.toLocaleString()}
-              </div>
-              <div class="text-xs text-gray-600">
-                ${anualSaldo >= 0 ? '💰 Ganancia neta' : '📉 Pérdida neta'}
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-      
-      // Gráfico de Ingreso vs Egreso (Pasajes y Aportes)
-      if (ingresoVsEgresoChart) ingresoVsEgresoChart.destroy();
-      const ctx2 = document.getElementById('ingresoVsEgresoChart').getContext('2d');
-      ingresoVsEgresoChart = new Chart(ctx2, {
-        type: 'bar',
-        data: {
-          labels,
-          datasets: [
-            { label: 'Ingresos', data: ingresos, backgroundColor: chartColors.ingresos },
-            { label: 'Pasajes', data: egresos, backgroundColor: chartColors.egresos },
-            { label: 'Aportes BPS', data: descuentosBPS, backgroundColor: '#f97316' },
-            { label: 'Aportes Fondo Coop', data: descuentosFondoCoop, backgroundColor: '#a855f7' }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { position: 'top' } },
-          scales: { y: { beginAtZero: true } }
-        }
-      });
-    }
-
-    // --- Botón ocultar/mostrar gráficas ---
-    document.getElementById('toggleChartsBtn').onclick = () => {
-      const c = document.getElementById('chartsContainer');
-      c.classList.toggle('hidden');
-    };
-
-    // --- Botón ocultar/mostrar gráfico ingreso vs egreso ---
-    document.getElementById('toggleIngresoVsEgresoBtn').onclick = () => {
-      const c = document.getElementById('ingresoVsEgresoContainer');
-      c.classList.toggle('hidden');
-    };
-
-    // --- Exportar JSON ---
-    document.getElementById('exportJsonBtn').onclick = () => {
-      const data = {
-        institutions, attendance, selectedMonths, currentYear, annualReportPeriod
-      };
-      const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-      const monthsStr = selectedMonths.map(m => monthNames[m]).join('_');
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `clases_${monthsStr}_${currentYear}.json`;
-      a.click();
-    };
-
-    // --- Importar JSON ---
-    document.getElementById('importJsonBtn').onclick = () => {
-      document.getElementById('importFileInput').click();
-    };
-    document.getElementById('importFileInput').onchange = (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        try {
-          const data = JSON.parse(evt.target.result);
-          if (data.institutions && data.attendance) {
-            institutions = data.institutions;
-            attendance = data.attendance;
-            if (data.selectedMonths) selectedMonths = data.selectedMonths;
-            if (data.currentYear) currentYear = data.currentYear;
-            if (data.annualReportPeriod) annualReportPeriod = data.annualReportPeriod;
-            renderMonthDropdown();
-            renderAnnualPeriodDropdown();
-            renderDashboard();
-            renderChartsAndSummary();
-            saveToLocal();
-          }
-        } catch (err) { alert('Archivo inválido'); }
-      };
-      reader.readAsText(file);
-    };
-
-    // --- Exportar PDF ---
-    document.getElementById('exportPdfBtn').onclick = async () => {
-      const monthsStr = selectedMonths.map(m => monthNames[m]).join('_');
-      const pdf = new window.jspdf.jsPDF('p', 'pt', 'a4');
-      // Dashboard
-      const dash = document.getElementById('dashboard');
-      await html2canvas(dash, {scale:2}).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        const imgProps = pdf.getImageProperties(imgData);
-        let pdfWidth = pageWidth - 40, pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-        if (pdfHeight > pageHeight - 40) {
-          pdfHeight = pageHeight - 40;
-          pdfWidth = (imgProps.width * pdfHeight) / imgProps.height;
-        }
-        pdf.addImage(imgData, 'PNG', 20, 20, pdfWidth, pdfHeight);
-      });
-      pdf.addPage();
-      // Gráfica
-      const chartCanvas = document.getElementById('mainChart');
-      await html2canvas(chartCanvas, {scale:2}).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        const imgProps = pdf.getImageProperties(imgData);
-        let pdfWidth = pageWidth - 40, pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-        if (pdfHeight > pageHeight - 40) {
-          pdfHeight = pageHeight - 40;
-          pdfWidth = (imgProps.width * pdfHeight) / imgProps.height;
-        }
-        pdf.addImage(imgData, 'PNG', 20, 20, pdfWidth, pdfHeight);
-      });
-      pdf.addPage();
-      // Gráfico de Ingreso vs Egreso
-      const ingresoVsEgresoCanvas = document.getElementById('ingresoVsEgresoChart');
-      await html2canvas(ingresoVsEgresoCanvas, {scale:2}).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        const imgProps = pdf.getImageProperties(imgData);
-        let pdfWidth = pageWidth - 40, pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-        if (pdfHeight > pageHeight - 40) {
-          pdfHeight = pageHeight - 40;
-          pdfWidth = (imgProps.width * pdfHeight) / imgProps.height;
-        }
-        pdf.addImage(imgData, 'PNG', 20, 20, pdfWidth, pdfHeight);
-      });
-      pdf.addPage();
-      // Resumen anual
-      const resumen = document.getElementById('annualSummary');
-      await html2canvas(resumen, {scale:2}).then(canvas => {
-        pdf.addPage();
-        const imgData = canvas.toDataURL('image/png');
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        const imgProps = pdf.getImageProperties(imgData);
-        let pdfWidth = pageWidth - 40, pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-        if (pdfHeight > pageHeight - 40) {
-          pdfHeight = pageHeight - 40;
-          pdfWidth = (imgProps.width * pdfHeight) / imgProps.height;
-        }
-        pdf.addImage(imgData, 'PNG', 20, 20, pdfWidth, pdfHeight);
-      });
-      pdf.save(`reporte_clases_${monthsStr}_${currentYear}.pdf`);
-    };
-
-    // --- Panel de control de instituciones en modal ---
-    const institutionsPanelModal = document.getElementById('institutionsPanelModal');
-    document.getElementById('panelInstitucionesBtn').onclick = () => {
-      institutionsPanelModal.classList.remove('hidden');
-      renderInstitutionsPanel();
-    };
-    document.getElementById('closeInstitutionsPanelBtn').onclick = () => {
-      institutionsPanelModal.classList.add('hidden');
-    };
-
-    // --- Panel de control de instituciones ---
-    function renderInstitutionsPanel() {
-      const list = document.getElementById('institutionsList');
-      if (institutions.length === 0) {
-        list.innerHTML = '<span class="text-gray-500">No hay instituciones registradas.</span>';
-        return;
-      }
-      let html = `<table class="min-w-full text-sm text-left"><thead><tr class="border-b"><th class="py-1 px-2">Nombre</th><th class="py-1 px-2">Valor clase</th><th class="py-1 px-2">Pasaje</th><th class="py-1 px-2">Días</th><th class="py-1 px-2">Boleta</th><th class="py-1 px-2">Acciones</th></tr></thead><tbody>`;
-      institutions.forEach((inst, idx) => {
-        html += `<tr class="border-b">
-          <td class="py-1 px-2">${inst.name}</td>
-          <td class="py-1 px-2">$${inst.value}</td>
-          <td class="py-1 px-2">$${inst.pasaje}</td>
-          <td class="py-1 px-2">${inst.days.map(d=>dayNames[parseInt(d)]).join(', ')}</td>
-          <td class="py-1 px-2">${inst.requiereBoleta ? 'Sí' : 'No'}</td>
-          <td class="py-1 px-2 flex gap-2">
-            <button class="editInstBtn bg-yellow-400 text-white px-2 py-0.5 rounded" data-idx="${idx}">Editar</button>
-            <button class="delInstBtn bg-red-500 text-white px-2 py-0.5 rounded" data-idx="${idx}">Eliminar</button>
-          </td>
-        </tr>`;
-      });
-      html += '</tbody></table>';
-      list.innerHTML = html;
-      // Acciones editar/eliminar
-      document.querySelectorAll('.editInstBtn').forEach(btn => {
-        btn.onclick = () => openEditInstitutionModal(parseInt(btn.dataset.idx));
-      });
-      document.querySelectorAll('.delInstBtn').forEach(btn => {
-        btn.onclick = () => {
-          if (confirm('¿Seguro que deseas eliminar esta institución?')) {
-            institutions.splice(parseInt(btn.dataset.idx), 1);
-            renderInstitutionsPanel();
-            renderDashboard();
-            renderChartsAndSummary();
-            saveToLocal();
-          }
-        };
-      });
-    }
-
-    // --- Modal reutilizable para agregar/editar institución ---
-    let editingInstitutionIdx = null;
-    document.getElementById('openModalBtn2').onclick = () => {
-      editingInstitutionIdx = null;
-      openInstitutionModal();
-    };
-    function openEditInstitutionModal(idx) {
-      editingInstitutionIdx = idx;
-      openInstitutionModal(institutions[idx]);
-    }
-    function openInstitutionModal(inst) {
-      modalBg.classList.remove('hidden');
-      document.getElementById('instName').value = inst ? inst.name : '';
-      document.getElementById('instValue').value = inst ? inst.value : '';
-      document.getElementById('instPasaje').value = inst ? inst.pasaje : '';
-      Array.from(document.getElementById('instDays').options).forEach(opt => {
-        opt.selected = inst ? inst.days.includes(opt.value) : false;
-      });
-      // Estado de personalización y valor de días trabajados
-      if (inst && inst.personalizarDias) {
-        document.getElementById('instPersonalizarDias').checked = true;
-        document.getElementById('instDiasTrabajar').disabled = false;
-        document.getElementById('instDiasTrabajar').value = inst.dias_a_trabajar;
-      } else {
-        document.getElementById('instPersonalizarDias').checked = false;
-        document.getElementById('instDiasTrabajar').disabled = true;
-        setDiasTrabajarDefault();
-      }
-      // Estado de requiere boleta
-      document.getElementById('instRequiereBoleta').checked = inst ? (inst.requiereBoleta || false) : false;
-    }
-
-    // --- Estado para día extra ---
-    let extraDayInstitutionIdx = null;
-    let extraDayMonth = null;
-    // --- Abrir modal de día extra ---
-    function openExtraDayModal(instIdx, monthIdx) {
-      extraDayInstitutionIdx = instIdx;
-      extraDayMonth = monthIdx;
-      const inst = institutions[instIdx];
-      // Limitar date picker al mes
-      const year = currentYear;
-      const month = monthIdx + 1;
-      const firstDay = `${year}-${String(month).padStart(2, '0')}-01`;
-      const lastDay = `${year}-${String(month).padStart(2, '0')}-${String(new Date(year, month, 0).getDate()).padStart(2, '0')}`;
-      const dateInput = document.getElementById('extraDayDate');
-      dateInput.min = firstDay;
-      dateInput.max = lastDay;
-      dateInput.value = firstDay;
-      document.getElementById('extraDayValue').value = inst.value;
-      document.getElementById('extraDayModal').classList.remove('hidden');
-    }
-    document.getElementById('closeExtraDayModalBtn').onclick = () => {
-      document.getElementById('extraDayModal').classList.add('hidden');
-    };
-    document.getElementById('extraDayModal').onclick = (e) => {
-      if (e.target === document.getElementById('extraDayModal')) document.getElementById('extraDayModal').classList.add('hidden');
-    };
-    document.getElementById('extraDayForm').onsubmit = function(e) {
-      e.preventDefault();
-      const date = document.getElementById('extraDayDate').value;
-      const value = parseInt(document.getElementById('extraDayValue').value);
-      if (!date || !value) return;
-      const [year, month, day] = date.split('-').map(Number);
-      const inst = institutions[extraDayInstitutionIdx];
-      if (!inst.extraDays) inst.extraDays = [];
-      // Evitar duplicados
-      if (!inst.extraDays.some(ed => ed.year === year && ed.month === month - 1 && ed.day === day)) {
-        inst.extraDays.push({ year, month: month - 1, day, value });
-      }
-      document.getElementById('extraDayModal').classList.add('hidden');
-      renderDashboard();
-      renderChartsAndSummary();
-      saveToLocal();
-    };
-
-    // --- Modal de reportes ---
-    const reportesModal = document.getElementById('reportesModal');
-    document.getElementById('reportesBtn').onclick = () => {
-      renderReportesTable();
-      reportesModal.classList.remove('hidden');
-    };
-    document.getElementById('closeReportesModalBtn').onclick = () => {
-      reportesModal.classList.add('hidden');
-    };
-    reportesModal.onclick = (e) => {
-      if (e.target === reportesModal) reportesModal.classList.add('hidden');
-    };
-    function renderReportesTable() {
-      const months = getMonthsOfYear(currentYear);
-      let html = '';
-      let labels = [];
-      let aportesBPS = [];
-      let aportesFondo = [];
-      let gastosPasajes = [];
-      annualReportPeriod.forEach(m => {
-        labels.push(monthNames[m]);
-        let ingresoReal = 0, gastoPasajesReal = 0, descuentosBPS = 0, descuentosFondoCoop = 0, descuentosTotales = 0;
-        const month = months[m];
-        institutions.forEach(inst => {
-          const classDays = inst.days.map(Number);
-          const filteredDays = month.days.filter(d => classDays.includes(d.day));
-          let ingresoMesInst = 0;
-          filteredDays.forEach(d => {
-            const dateStr = `${currentYear}-${String(month.number+1).padStart(2,'0')}-${String(d.dayNum).padStart(2,'0')}`;
-            if (attendance[inst.id] && attendance[inst.id][dateStr] && attendance[inst.id][dateStr].status === 'ok') {
-              ingresoMesInst += attendance[inst.id][dateStr].value;
-              gastoPasajesReal += inst.pasaje;
-            }
-          });
-          // Días extra
-          if (inst.extraDays) {
-            inst.extraDays.filter(ed => ed.year === currentYear && ed.month === m).forEach(ed => {
-              const dateStr = `${ed.year}-${String(ed.month+1).padStart(2,'0')}-${String(ed.day).padStart(2,'0')}`;
-              if (attendance[inst.id] && attendance[inst.id][dateStr] && attendance[inst.id][dateStr].status === 'ok') {
-                ingresoMesInst += attendance[inst.id][dateStr].value;
-                gastoPasajesReal += inst.pasaje;
-              }
-            });
-          }
-          ingresoReal += ingresoMesInst;
-          // Calcular descuentos si requiere boleta
-          if (inst.requiereBoleta && ingresoMesInst > 0) {
-            descuentosBPS += calcularDescuentosBPS(ingresoMesInst);
-            descuentosFondoCoop += calcularDescuentosFondoCoop(ingresoMesInst);
-            descuentosTotales += calcularDescuentosTotales(ingresoMesInst);
-          }
-        });
-        aportesBPS.push(descuentosBPS);
-        aportesFondo.push(descuentosFondoCoop);
-        gastosPasajes.push(gastoPasajesReal);
-        html += `<tr><td class="py-1 px-2">${monthNames[m]}</td><td class="py-1 px-2">$${ingresoReal}</td><td class="py-1 px-2">$${gastoPasajesReal}</td><td class="py-1 px-2">$${descuentosBPS}</td><td class="py-1 px-2">$${descuentosFondoCoop}</td><td class="py-1 px-2">$${descuentosTotales}</td></tr>`;
-      });
-      document.getElementById('reportesTableBody').innerHTML = html;
-
-      // Gráfica de aportes
-      if (window.aportesChartObj) window.aportesChartObj.destroy();
-      const ctxAportes = document.getElementById('aportesChart').getContext('2d');
-      window.aportesChartObj = new Chart(ctxAportes, {
-        type: 'bar',
-        data: {
-          labels,
-          datasets: [
-            { label: 'BPS (15%)', data: aportesBPS, backgroundColor: '#3b82f6' },
-            { label: 'Fondo Coop (10%)', data: aportesFondo, backgroundColor: '#a855f7' }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { position: 'top' } },
-          scales: { y: { beginAtZero: true } }
-        }
-      });
-      // Gráfica de gastos
-      if (window.gastosChartObj) window.gastosChartObj.destroy();
-      const ctxGastos = document.getElementById('gastosChart').getContext('2d');
-      window.gastosChartObj = new Chart(ctxGastos, {
-        type: 'bar',
-        data: {
-          labels,
-          datasets: [
-            { label: 'Gasto de Pasajes', data: gastosPasajes, backgroundColor: '#ef4444' }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { position: 'top' } },
-          scales: { y: { beginAtZero: true } }
-        }
-      });
-    }
-
-    // Llamar al render del panel al inicio y tras cambios
-    renderInstitutionsPanel = renderInstitutionsPanel.bind(window);
-    
-    // Cargar datos al inicio
-    loadFromLocal();
-    updateYearBadge();
-    renderMonthDropdown();
-    renderAnnualPeriodDropdown();
-    renderInstitutionsPanel();
-    renderDashboard();
-    renderChartsAndSummary();
-
-    // 2. En el script, al seleccionar días o cambiar el mes, calcular automáticamente el valor por defecto:
-    document.getElementById('instDays').onchange = setDiasTrabajarDefault;
-    document.getElementById('instPersonalizarDias').onchange = function() {
-      document.getElementById('instDiasTrabajar').disabled = !this.checked;
-      if (!this.checked) setDiasTrabajarDefault();
-    };
-    function setDiasTrabajarDefault() {
-      if (!document.getElementById('instPersonalizarDias').checked) {
-        const days = Array.from(document.getElementById('instDays').selectedOptions).map(opt => parseInt(opt.value));
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = now.getMonth();
-        let count = 0;
-        let date = new Date(year, month, 1);
-        while (date.getMonth() === month) {
-          if (days.includes(date.getDay())) count++;
-          date.setDate(date.getDate() + 1);
-        }
-        document.getElementById('instDiasTrabajar').value = count;
-      }
-    }
-
-    // 3. Al guardar/agregar/editar institución, guardar si está personalizado o no:
-    const personalizarDias = document.getElementById('instPersonalizarDias').checked;
-    const dias_a_trabajar = parseInt(document.getElementById('instDiasTrabajar').value);
-    // ...institución..., dias_a_trabajar, personalizarDias
-    // ...
-    // 4. En renderDashboard y renderChartsAndSummary, para cada mes, si inst.personalizarDias es true usar inst.dias_a_trabajar, si no, calcular automáticamente la cantidad de días seleccionados en ese mes:
-    function getDiasTrabajar(inst, monthIdx, year) {
-      if (inst.personalizarDias) return inst.dias_a_trabajar;
-      const days = inst.days.map(Number);
-      let count = 0;
-      const monthDays = getMonthsOfYear(year)[monthIdx].days;
-      monthDays.forEach(d => { if (days.includes(d.day)) count++; });
-      return count;
-    }
-    // En el cálculo de proyección y gasto de pasajes:
-    const diasTrabajar = getDiasTrabajar(inst, month.number, currentYear);
-    let proyeccion = diasTrabajar * inst.value;
-    let gastoPasajesProyectado = diasTrabajar * inst.pasaje;
-    // ...
-    // No sumar días extra a la proyección, solo a ingresos reales si corresponde.
-    // ...
-
-    // --- Funciones para guardar y cargar toda la configuración ---
-    document.getElementById('guardarTodoBtn').onclick = () => {
-      // Recopilar todos los datos de la aplicación
-      const configuracionCompleta = {
-        // Dashboard principal
-        institutions: institutions,
-        attendance: attendance,
-        selectedMonths: selectedMonths,
-        currentYear: currentYear,
-        annualReportPeriod: annualReportPeriod,
-        
-        // Alumnos
-        alumnos: [],
-        asistenciaAlumnos: {},
-        pagosAlumnos: {},
-        
-        // Organizador de horarios
-        weeklySchedule: [],
-        
-        // Metadatos
-        version: '1.0',
-        fechaExportacion: new Date().toISOString(),
-        descripcion: 'Configuración completa del Panel de Gestión'
-      };
-      
-      // Cargar datos de alumnos si están disponibles
-      try {
-        const alumnosData = localStorage.getItem('alumnos_particulares');
-        const asistenciaData = localStorage.getItem('asistencia_alumnos');
-        const pagosData = localStorage.getItem('pagos_alumnos');
-        
-        if (alumnosData) configuracionCompleta.alumnos = JSON.parse(alumnosData);
-        if (asistenciaData) configuracionCompleta.asistenciaAlumnos = JSON.parse(asistenciaData);
-        if (pagosData) configuracionCompleta.pagosAlumnos = JSON.parse(pagosData);
-      } catch (e) {
-        console.log('No se pudieron cargar datos de alumnos:', e);
-      }
-      
-      // Cargar datos del organizador de horarios si están disponibles
-      try {
-        const horariosData = localStorage.getItem('weekly-schedule');
-        if (horariosData) configuracionCompleta.weeklySchedule = JSON.parse(horariosData);
-      } catch (e) {
-        console.log('No se pudieron cargar datos de horarios:', e);
-      }
-      
-      // Crear y descargar el archivo
-      const dataStr = JSON.stringify(configuracionCompleta, null, 2);
-      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-      
-      const exportFileDefaultName = `panel_gestion_completo_${new Date().toISOString().slice(0,10)}.json`;
-      
-      const linkElement = document.createElement('a');
-      linkElement.setAttribute('href', dataUri);
-      linkElement.setAttribute('download', exportFileDefaultName);
-      linkElement.click();
-      
-      alert('✅ Configuración completa guardada exitosamente');
-    };
-
-    document.getElementById('cargarTodoBtn').onclick = () => {
-      document.getElementById('cargarTodoInput').click();
-    };
-
-    document.getElementById('cargarTodoInput').onchange = (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        try {
-          const configuracionCompleta = JSON.parse(evt.target.result);
-          
-          // Verificar que sea un archivo válido
-          if (!configuracionCompleta.version || !configuracionCompleta.institutions) {
-            alert('❌ El archivo no es una configuración válida del Panel de Gestión');
-            return;
-          }
-          
-          // Confirmar antes de sobrescribir
-          if (!confirm('⚠️ ¿Estás seguro de que quieres cargar esta configuración? Se sobrescribirán todos los datos actuales.')) {
-            return;
-          }
-          
-          // Cargar datos del dashboard
-          if (configuracionCompleta.institutions) institutions = configuracionCompleta.institutions;
-          if (configuracionCompleta.attendance) attendance = configuracionCompleta.attendance;
-          if (configuracionCompleta.selectedMonths) selectedMonths = configuracionCompleta.selectedMonths;
-          if (configuracionCompleta.currentYear) currentYear = configuracionCompleta.currentYear;
-          if (configuracionCompleta.annualReportPeriod) annualReportPeriod = configuracionCompleta.annualReportPeriod;
-          
-          // Guardar datos del dashboard
-          saveToLocal();
-          
-          // Cargar datos de alumnos
-          if (configuracionCompleta.alumnos) {
-            localStorage.setItem('alumnos_particulares', JSON.stringify(configuracionCompleta.alumnos));
-          }
-          if (configuracionCompleta.asistenciaAlumnos) {
-            localStorage.setItem('asistencia_alumnos', JSON.stringify(configuracionCompleta.asistenciaAlumnos));
-          }
-          if (configuracionCompleta.pagosAlumnos) {
-            localStorage.setItem('pagos_alumnos', JSON.stringify(configuracionCompleta.pagosAlumnos));
-          }
-          
-          // Cargar datos del organizador de horarios
-          if (configuracionCompleta.weeklySchedule) {
-            localStorage.setItem('weekly-schedule', JSON.stringify(configuracionCompleta.weeklySchedule));
-          }
-          
-          // Actualizar la interfaz
-          updateYearBadge();
-          renderMonthDropdown();
-          renderAnnualPeriodDropdown();
-          renderInstitutionsPanel();
-          renderDashboard();
-          renderChartsAndSummary();
-          
-          alert('✅ Configuración completa cargada exitosamente');
-          
-        } catch (err) { 
-          alert('❌ Error al cargar el archivo: ' + err.message); 
-        }
-      };
-      reader.readAsText(file);
-    };
-
-    window.onload = function() {
-      if (document.getElementById('alumnosNavBtn')) {
-        document.getElementById('alumnosNavBtn').onclick = function() {
-          document.getElementById('dashboard').classList.add('hidden');
-          document.getElementById('chartsContainer').classList.add('hidden');
-          document.getElementById('annualSummary').classList.add('hidden');
-          document.getElementById('alumnosPage').classList.remove('hidden');
-          if (typeof renderAlumnosPage === 'function') renderAlumnosPage();
-          closeMobileMenu();
-        };
-      }
-      if (document.getElementById('volverDashboardBtn')) {
-        document.getElementById('volverDashboardBtn').onclick = function() {
-          document.getElementById('alumnosPage').classList.add('hidden');
-          document.getElementById('dashboard').classList.remove('hidden');
-          document.getElementById('chartsContainer').classList.remove('hidden');
-          document.getElementById('annualSummary').classList.remove('hidden');
-        };
-      }
-      
-      // Inicializar navegación móvil
-      initMobileNavigation();
-    };
-
-    // Navegación móvil
-    function initMobileNavigation() {
-      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('sidebarOverlay');
-      
-      if (mobileMenuBtn && sidebar && overlay) {
-        // Abrir menú
-        mobileMenuBtn.addEventListener('click', () => {
-          sidebar.classList.add('open');
-          overlay.classList.add('open');
-          document.body.style.overflow = 'hidden';
-        });
-        
-        // Cerrar menú
-        overlay.addEventListener('click', closeMobileMenu);
-        
-        // Cerrar con Escape
-        document.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape') {
-            closeMobileMenu();
-          }
-        });
-        
-        // Cerrar al hacer clic en enlaces del sidebar
-        const sidebarLinks = sidebar.querySelectorAll('a, button');
-        sidebarLinks.forEach(link => {
-          link.addEventListener('click', () => {
-            setTimeout(closeMobileMenu, 100);
-          });
-        });
-      }
-    }
-    
-    function closeMobileMenu() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('sidebarOverlay');
-      
-      if (sidebar && overlay) {
-        sidebar.classList.remove('open');
-        overlay.classList.remove('open');
-        document.body.style.overflow = '';
-      }
-    }
-
-    // PWA Service Worker Registration
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
+      // Registrar service worker
+      if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js')
-          .then((registration) => {
-            console.log('Service Worker registrado exitosamente:', registration.scope);
-            
-            // Verificar actualizaciones
-            registration.addEventListener('updatefound', () => {
-              const newWorker = registration.installing;
-              newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // Nueva versión disponible
-                  if (confirm('Hay una nueva versión disponible. ¿Quieres actualizar ahora?')) {
-                    newWorker.postMessage({ type: 'SKIP_WAITING' });
-                    window.location.reload();
-                  }
-                }
-              });
-            });
-          })
-          .catch((error) => {
-            console.log('Error al registrar Service Worker:', error);
-          });
-      });
-    }
-
-    // PWA Install Prompt
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      
-      // Mostrar botón de instalación si no está instalada
-      const installButton = document.createElement('button');
-      installButton.textContent = '📱 Instalar App';
-      installButton.className = 'bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors';
-      installButton.onclick = () => {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('Usuario aceptó instalar la app');
-          }
-          deferredPrompt = null;
-        });
-      };
-      
-      // Agregar botón al header si no existe
-      if (!document.getElementById('installButton')) {
-        installButton.id = 'installButton';
-        const header = document.querySelector('header .flex');
-        if (header) {
-          header.appendChild(installButton);
-        }
+          .then(registration => console.log('SW registrado'))
+          .catch(error => console.log('Error SW:', error));
       }
     });
 
-    // Detectar móviles y forzar estilos responsivos
-    function detectMobile() {
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-                      window.innerWidth <= 768;
-      
-      if (isMobile) {
-        document.body.classList.add('mobile-detected');
+    // Función para cargar datos
+    function loadData() {
+      try {
+        // Cargar datos de localStorage
+        const alumnosData = localStorage.getItem('alumnos_particulares');
+        const horariosData = localStorage.getItem('weekly-schedule');
+        const finanzasData = localStorage.getItem('gestor_financiero_transactions');
         
-        // Mostrar información de diagnóstico en móvil
-        console.log('🔍 Diagnóstico móvil:');
-        console.log('- User Agent:', navigator.userAgent);
-        console.log('- Screen width:', window.innerWidth);
-        console.log('- LocalStorage disponible:', typeof(Storage) !== "undefined");
+        // Procesar datos de alumnos
+        if (alumnosData) {
+          const alumnos = JSON.parse(alumnosData);
+          dashboardData.totalAlumnos = alumnos.length || 0;
+        }
         
-        // Verificar datos cargados
-        const instData = localStorage.getItem('clases_institutions');
-        const attData = localStorage.getItem('clases_attendance');
-        console.log('- Instituciones cargadas:', instData ? JSON.parse(instData).length : 0);
-        console.log('- Asistencia cargada:', attData ? Object.keys(JSON.parse(attData)).length : 0);
+        // Procesar datos de horarios
+        if (horariosData) {
+          const horarios = JSON.parse(horariosData);
+          dashboardData.clasesSemana = calcularClasesSemana(horarios);
+          dashboardData.proximasClases = obtenerProximasClases(horarios);
+        }
         
-        // Mostrar notificación de diagnóstico
-        const diagnosticInfo = document.createElement('div');
-        diagnosticInfo.id = 'mobileDiagnostic';
-        diagnosticInfo.style.cssText = `
-          position: fixed;
-          top: 10px;
-          right: 10px;
-          background: rgba(0,0,0,0.8);
-          color: white;
-          padding: 10px;
-          border-radius: 5px;
-          font-size: 12px;
-          z-index: 9999;
-          max-width: 200px;
-        `;
-        diagnosticInfo.innerHTML = `
-          📱 Móvil detectado<br>
-          📊 Datos: ${instData ? JSON.parse(instData).length : 0} instituciones<br>
-          📅 Asistencia: ${attData ? Object.keys(JSON.parse(attData)).length : 0} registros<br>
-          <button onclick="this.parentElement.remove()" style="background: #4CAF50; border: none; color: white; padding: 2px 8px; border-radius: 3px; margin-top: 5px; font-size: 10px;">Cerrar</button>
-        `;
-        document.body.appendChild(diagnosticInfo);
+        // Procesar datos financieros
+        if (finanzasData) {
+          const transacciones = JSON.parse(finanzasData);
+          dashboardData.ingresosMes = calcularIngresosMes(transacciones);
+        }
         
-        // Auto-remover después de 10 segundos
-        setTimeout(() => {
-          if (diagnosticInfo.parentElement) {
-            diagnosticInfo.remove();
-          }
-        }, 10000);
-        
-        // Forzar estilos móviles
-        const style = document.createElement('style');
-        style.textContent = `
-          @media (max-width: 768px), (max-device-width: 768px) {
-            nav { 
-              position: fixed !important;
-              top: 0 !important;
-              left: -100% !important;
-              width: 80% !important;
-              height: 100vh !important;
-              z-index: 1000 !important;
-              transition: left 0.3s ease !important;
-              background: rgb(31, 41, 55) !important;
-            }
-            
-            nav.open {
-              left: 0 !important;
-            }
-            
-            nav:not(.open) {
-              display: none !important;
-            }
-            
-            header {
-              margin-left: 0 !important;
-              padding: 1rem !important;
-              width: 100% !important;
-            }
-            
-            div[style*="margin-left:12rem"] {
-              margin-left: 0 !important;
-              padding: 0.5rem !important;
-              width: 100% !important;
-              max-width: 100% !important;
-            }
-            
-            .mobile-menu-btn {
-              display: block !important;
-              position: fixed !important;
-              top: 1rem !important;
-              left: 1rem !important;
-              z-index: 1001 !important;
-              background: #4a90e2 !important;
-              color: white !important;
-              border: none !important;
-              padding: 0.75rem !important;
-              border-radius: 0.25rem !important;
-              box-shadow: 0 2px 10px rgba(0,0,0,0.3) !important;
-            }
-          }
-        `;
-        document.head.appendChild(style);
-        
-        console.log('Móvil detectado - Aplicando estilos responsivos');
+        console.log('Datos cargados:', dashboardData);
+      } catch (error) {
+        console.error('Error cargando datos:', error);
       }
     }
-    
-    // Ejecutar detección al cargar
-    document.addEventListener('DOMContentLoaded', detectMobile);
+
+    // Función para sincronizar datos
+    function syncData() {
+      const dataSync = new DataSync();
+      
+      // Mostrar notificación de sincronización
+      showNotification('Sincronizando datos...', 'info');
+      
+      // Simular sincronización con la nube
+      dataSync.syncWithCloud().then(result => {
+        if (result.success) {
+          showNotification('Datos sincronizados exitosamente', 'success');
+          document.getElementById('lastSync').textContent = new Date().toLocaleString();
+        } else {
+          showNotification('Error en la sincronización', 'error');
+        }
+      }).catch(error => {
+        showNotification('Error: ' + error.message, 'error');
+      });
+    }
+
+    // Funciones auxiliares
+    function calcularClasesSemana(horarios) {
+      // Lógica para calcular clases de la semana
+      return Object.keys(horarios || {}).length;
+    }
+
+    function obtenerProximasClases(horarios) {
+      // Lógica para obtener próximas clases
+      return [];
+    }
+
+    function calcularIngresosMes(transacciones) {
+      // Lógica para calcular ingresos del mes
+      return transacciones ? transacciones.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : 0), 0) : 0;
+    }
+
+    // Actualizar dashboard
+    function updateDashboard() {
+      document.getElementById('totalAlumnos').textContent = dashboardData.totalAlumnos;
+      document.getElementById('clasesSemana').textContent = dashboardData.clasesSemana;
+      document.getElementById('ingresosMes').textContent = `$${dashboardData.ingresosMes.toLocaleString()}`;
+      document.getElementById('asistenciaPromedio').textContent = `${dashboardData.asistenciaPromedio}%`;
+      
+      // Actualizar próximas clases
+      const proximasClasesDiv = document.getElementById('proximasClases');
+      if (dashboardData.proximasClases.length > 0) {
+        proximasClasesDiv.innerHTML = dashboardData.proximasClases.map(clase => 
+          `<div class="p-3 bg-gray-50 rounded">${clase}</div>`
+        ).join('');
+      } else {
+        proximasClasesDiv.innerHTML = '<p class="text-gray-500">No hay clases programadas</p>';
+      }
+    }
+
+    // Inicializar gráficos
+    function initializeCharts() {
+      // Gráfico de asistencia
+      const asistenciaCtx = document.getElementById('asistenciaChart').getContext('2d');
+      chartInstances.asistencia = new Chart(asistenciaCtx, {
+        type: 'line',
+        data: {
+          labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+          datasets: [{
+            label: 'Asistencia %',
+            data: [85, 88, 92, 87, 90, 89],
+            borderColor: 'rgb(59, 130, 246)',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            tension: 0.1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+
+      // Gráfico de ingresos
+      const ingresosCtx = document.getElementById('ingresosChart').getContext('2d');
+      chartInstances.ingresos = new Chart(ingresosCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+          datasets: [{
+            label: 'Ingresos $',
+            data: [1200, 1400, 1100, 1600, 1300, 1500],
+            backgroundColor: 'rgba(34, 197, 94, 0.8)',
+            borderColor: 'rgb(34, 197, 94)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+    }
+
+    // Navegación
+    function showSection(sectionName) {
+      // Ocultar todas las secciones
+      document.querySelectorAll('[id$="-section"]').forEach(section => {
+        section.classList.add('hidden');
+      });
+      
+      // Mostrar la sección seleccionada
+      document.getElementById(sectionName + '-section').classList.remove('hidden');
+      currentSection = sectionName;
+    }
+
+    // Funciones móviles
+    function toggleMobileMenu() {
+      const nav = document.querySelector('nav');
+      const overlay = document.querySelector('.sidebar-overlay');
+      
+      nav.classList.toggle('open');
+      overlay.classList.toggle('open');
+    }
+
+    function closeMobileMenu() {
+      const nav = document.querySelector('nav');
+      const overlay = document.querySelector('.sidebar-overlay');
+      
+      nav.classList.remove('open');
+      overlay.classList.remove('open');
+    }
+
+    // Cerrar menú con Escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeMobileMenu();
+      }
+    });
+
+    // Funciones de reportes
+    function generarReporteMensual() {
+      alert('Generando reporte mensual...');
+      // Aquí iría la lógica para generar el PDF
+    }
+
+    function generarReporteAnual() {
+      alert('Generando reporte anual...');
+      // Aquí iría la lógica para generar el PDF
+    }
+
+    // Funciones de backup y restore
+    function createBackup() {
+      const dataSync = new DataSync();
+      try {
+        dataSync.generateBackupFile();
+        showNotification('Backup creado exitosamente', 'success');
+      } catch (error) {
+        showNotification('Error creando backup: ' + error.message, 'error');
+      }
+    }
+
+    function restoreBackup() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const dataSync = new DataSync();
+          try {
+            showNotification('Restaurando backup...', 'info');
+            const result = await dataSync.restoreFromFile(file);
+            if (result.success) {
+              showNotification(`Backup restaurado: ${result.importedCount} elementos`, 'success');
+              // Recargar datos
+              loadData();
+              updateDashboard();
+            } else {
+              showNotification('Error en la restauración: ' + result.errors.join(', '), 'error');
+            }
+          } catch (error) {
+            showNotification('Error: ' + error.message, 'error');
+          }
+        }
+      };
+      input.click();
+    }
+
+    // Detectar si es móvil y aplicar estilos
+    function detectMobile() {
+      if (window.innerWidth <= 768) {
+        document.body.classList.add('mobile-detected');
+        // Forzar estilos móviles si es necesario
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+          mainContent.style.marginLeft = '0';
+        }
+      }
+    }
+
+    // Ejecutar detección de móvil
+    detectMobile();
     window.addEventListener('resize', detectMobile);
   </script>
 </body>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organizador Semanal</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Tailwind CSS para la navbar -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <!-- Navbar superior simple -->
+    <nav class="bg-gray-900 text-white py-3 px-4 shadow-lg">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <span class="text-xl font-bold">Panel de Gestión - Organizador Semanal</span>
+            <div class="flex gap-3">
+                <a href="../alumnos.html" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded transition font-medium">
+                    <i class="fas fa-users mr-2"></i>Alumnos
+                </a>
+                <a href="../dashboard.html" class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded transition font-medium">
+                    <i class="fas fa-home mr-2"></i>Inicio
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="app-container">
+        <header>
+            <div class="header-actions">
+                <button id="addActivityBtn" class="btn primary">
+                    <i class="fas fa-plus"></i> Nueva Actividad
+                </button>
+                <div class="export-buttons">
+                    <button id="exportJsonBtn" class="btn secondary">
+                        <i class="fas fa-file-code"></i> Exportar JSON
+                    </button>
+                    <button id="exportPdfBtn" class="btn secondary">
+                        <i class="fas fa-file-pdf"></i> Exportar PDF
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="timeline-container">
+                <div class="timeline-header">
+                    <div class="day-label"></div>
+                    <div class="time-slots"></div>
+                </div>
+                <div class="timeline-body"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para agregar/editar actividad -->
+    <div id="activityModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Nueva Actividad</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="activityForm">
+                <div class="form-group">
+                    <label for="activityName">Nombre de la Actividad</label>
+                    <input type="text" id="activityName" required>
+                </div>
+                <div class="form-group">
+                    <label for="activityDay">Día</label>
+                    <select id="activityDay" required>
+                        <option value="LUNES">Lunes</option>
+                        <option value="MARTES">Martes</option>
+                        <option value="MIERCOLES">Miércoles</option>
+                        <option value="JUEVES">Jueves</option>
+                        <option value="VIERNES">Viernes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="activityStart">Hora de Inicio</label>
+                    <input type="time" id="activityStart" required>
+                </div>
+                <div class="form-group">
+                    <label for="activityEnd">Hora de Fin</label>
+                    <input type="time" id="activityEnd" required>
+                </div>
+                <div class="form-group">
+                    <label for="activityColor">Color</label>
+                    <input type="color" id="activityColor" value="#f6c89f">
+                </div>
+                <input type="hidden" id="activityId">
+                <div class="form-actions">
+                    <button type="submit" class="btn primary">Guardar</button>
+                    <button type="button" class="btn secondary" id="cancelBtn">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html> 

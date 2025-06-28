@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de alumnos</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+  <!-- Sidebar de navegación sobria -->
+  <style>
+    .sidebar-btn {
+      width: 100%;
+      text-align: left;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      transition: all 0.2s;
+      background-color: rgb(31, 41, 55);
+      color: white;
+      font-weight: 500;
+    }
+    .sidebar-btn:hover {
+      background-color: rgb(55, 65, 81);
+      color: rgb(147, 197, 253);
+    }
+    .sidebar-btn:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgb(96, 165, 250);
+    }
+    .sidebar-text {
+      transition: color 0.2s;
+      cursor: pointer;
+    }
+    .sidebar-text:hover {
+      color: rgb(147, 197, 253);
+    }
+    .dropdown-text {
+      transition: color 0.2s;
+    }
+    .dropdown-text:hover {
+      color: rgb(147, 197, 253);
+    }
+    @media (max-width: 768px) {
+      nav { 
+        min-width: 100vw !important; 
+        width: 100vw !important; 
+        position: relative !important; 
+      }
+    }
+  </style>
+  <nav class="bg-gray-900 text-white w-48 min-h-screen flex flex-col py-6 px-4 fixed left-0 top-0 z-30 shadow-lg">
+    <span class="text-2xl font-bold tracking-wide mb-8 text-center sidebar-text">Panel de Gestión</span>
+    <div class="flex flex-col gap-2 flex-1">
+      <a href="dashboard.html" id="dashboardNavBtn" class="sidebar-btn">Inicio</a>
+      <a href="Organizador de Horarios Personal/Organizador de Horarios Personal.html" id="horariosNavBtn" class="sidebar-btn">Organizador de Horarios</a>
+      
+      <!-- Desplegable de Institución -->
+      <div class="relative">
+        <button id="institucionDropdownBtn" class="sidebar-btn w-full flex items-center justify-between">
+          <span>Institución</span>
+          <svg class="w-4 h-4 transition-transform" id="institucionDropdownIcon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+        <div id="institucionDropdownMenu" class="bg-gray-800 rounded shadow-lg hidden mt-1">
+          <button id="openModalBtn" class="w-full text-left px-4 py-2 hover:bg-gray-700 hover:text-blue-300 transition dropdown-text">Registrar institución</button>
+          <button id="panelInstitucionesBtn" class="w-full text-left px-4 py-2 hover:bg-gray-700 hover:text-blue-300 transition dropdown-text">Panel de instituciones</button>
+        </div>
+      </div>
+      
+      <!-- Desplegable de Guardar/Abrir -->
+      <div class="relative">
+        <button id="guardarAbrirDropdownBtn" class="sidebar-btn w-full flex items-center justify-between">
+          <span>Guardar/Abrir</span>
+          <svg class="w-4 h-4 transition-transform" id="guardarAbrirDropdownIcon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+        <div id="guardarAbrirDropdownMenu" class="bg-gray-800 rounded shadow-lg hidden mt-1">
+          <button id="exportJsonBtn" class="w-full text-left px-4 py-2 hover:bg-gray-700 hover:text-blue-300 transition dropdown-text">Exportar JSON</button>
+          <button id="importJsonBtn" class="w-full text-left px-4 py-2 hover:bg-gray-700 hover:text-blue-300 transition dropdown-text">Importar JSON</button>
+          <button id="exportPdfBtn" class="w-full text-left px-4 py-2 hover:bg-gray-700 hover:text-blue-300 transition dropdown-text">Exportar PDF</button>
+          <button id="guardarTodoBtn" class="w-full text-left px-4 py-2 hover:bg-gray-700 hover:text-blue-300 transition dropdown-text">💾 Guardar Todo</button>
+          <button id="cargarTodoBtn" class="w-full text-left px-4 py-2 hover:bg-gray-700 hover:text-blue-300 transition dropdown-text">📂 Cargar Todo</button>
+        </div>
+      </div>
+      
+      <button id="reportesBtn" class="sidebar-btn text-left">Reportes</button>
+      <input type="file" id="importFileInput" accept="application/json" class="hidden" />
+      <input type="file" id="cargarTodoInput" accept="application/json" class="hidden" />
+    </div>
+  </nav>
+  <div class="flex-1 flex justify-center items-start" style="margin-left:12rem;">
+    <div class="max-w-5xl w-full py-8 px-4 bg-white rounded-lg shadow-lg mt-8">
+      <div id="alumnosPage"></div>
+    </div>
+  </div>
+  <!-- Modal de registro de institución -->
+  <div id="modalBg" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-30 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative overflow-y-auto max-h-[90vh]">
+      <button id="closeModalBtn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-gray-700">&times;</button>
+      <h2 class="text-lg font-bold mb-4">Registrar institución</h2>
+      <form id="institutionForm" class="space-y-4">
+        <div>
+          <label class="block font-semibold mb-1">Nombre de la institución</label>
+          <input type="text" id="instName" required class="w-full border rounded px-2 py-1" />
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">Valor general de la clase</label>
+          <input type="number" id="instValue" min="1" required class="w-full border rounded px-2 py-1" />
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">Costo de pasaje por clase</label>
+          <input type="number" id="instPasaje" min="0" required class="w-full border rounded px-2 py-1" />
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">Días de clase</label>
+          <select id="instDays" multiple size="7" required class="w-full border rounded px-2 py-1">
+            <option value="1">Lunes</option>
+            <option value="2">Martes</option>
+            <option value="3">Miércoles</option>
+            <option value="4">Jueves</option>
+            <option value="5">Viernes</option>
+            <option value="6">Sábado</option>
+            <option value="0">Domingo</option>
+          </select>
+          <span class="text-gray-500 text-xs">(Ctrl+Click para seleccionar varios)</span>
+        </div>
+        <div class="flex items-center mb-2">
+          <input type="checkbox" id="instPersonalizarDias" class="mr-2" />
+          <label for="instPersonalizarDias" class="text-sm">Personalizar días a trabajar por mes</label>
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">Días a trabajar por mes</label>
+          <input type="number" id="instDiasTrabajar" min="1" max="31" value="" disabled required class="w-full border rounded px-2 py-1" />
+          <span class="text-gray-500 text-xs">Por defecto se calcula automáticamente según los días seleccionados y el mes.</span>
+        </div>
+        <div class="flex items-center mb-2">
+          <input type="checkbox" id="instRequiereBoleta" class="mr-2" />
+          <label for="instRequiereBoleta" class="text-sm">Requiere boleta (aplica descuentos BPS 15% y Fondo Cooperativa 10%)</label>
+        </div>
+        <div class="flex justify-end">
+          <button type="submit" class="bg-blue-700 text-white px-4 py-1 rounded hover:bg-blue-800 transition">Agregar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de panel de control de instituciones -->
+  <div id="institutionsPanelModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-40 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-2xl relative">
+      <button id="closeInstitutionsPanelBtn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-gray-700">&times;</button>
+      <h2 class="text-lg font-bold mb-4">Panel de Instituciones</h2>
+      <div class="flex justify-end mb-2">
+        <button id="openModalBtn2" class="bg-blue-700 text-white px-3 py-1 rounded hover:bg-blue-800 transition">Agregar institución</button>
+      </div>
+      <div id="institutionsList" class="overflow-x-auto"></div>
+    </div>
+  </div>
+
+  <!-- Modal de reportes mensuales -->
+  <div id="reportesModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-2xl relative">
+      <button id="closeReportesModalBtn" class="absolute top-2 right-3 text-2xl text-gray-400 hover:text-gray-700">&times;</button>
+      <h2 class="text-lg font-bold mb-4">Reporte mensual de ingresos y pasajes</h2>
+      <!-- Gráficas de aportes y gastos -->
+      <div class="flex flex-col md:flex-row gap-6 mb-6">
+        <div class="flex-1">
+          <h3 class="text-base font-semibold text-blue-700 mb-2">Aportes</h3>
+          <canvas id="aportesChart" height="120"></canvas>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-base font-semibold text-rose-700 mb-2">Gastos</h3>
+          <canvas id="gastosChart" height="120"></canvas>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm text-left border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+          <thead class="bg-gray-50 sticky top-0 z-10">
+            <tr>
+              <th class="py-2 px-3 font-bold text-gray-700 border-b">Mes</th>
+              <th class="py-2 px-3 font-bold text-green-700 border-b">Ingreso real</th>
+              <th class="py-2 px-3 font-bold text-rose-700 border-b">Gasto de pasajes real</th>
+              <th class="py-2 px-3 font-bold text-blue-700 border-b">Descuentos BPS (15%)</th>
+              <th class="py-2 px-3 font-bold text-blue-700 border-b">Descuentos Fondo Coop (10%)</th>
+              <th class="py-2 px-3 font-bold text-blue-900 border-b">Total descuentos (25%)</th>
+            </tr>
+          </thead>
+          <tbody id="reportesTableBody" class="divide-y divide-gray-100"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de reporte -->
+  <div id="reporteModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-6xl max-h-[90vh] relative overflow-hidden">
+      <button id="closeReporteModalBtn" class="absolute top-4 right-4 text-2xl text-gray-400 hover:text-gray-700 z-10">&times;</button>
+      <h2 class="text-lg font-bold mb-4 pr-8">Reporte de ingresos y pagos</h2>
+      <div class="overflow-y-auto max-h-[calc(90vh-120px)]">
+        <div class="mb-6">
+          <canvas id="ingresosChart" height="80"></canvas>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm text-left border">
+            <thead id="reportePagosTableHead" class="sticky top-0 bg-white">
+              <!-- El encabezado se llenará dinámicamente desde JS -->
+            </thead>
+            <tbody id="reportePagosTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="alumnos.js"></script>
+  <script>
+    // --- Manejo del desplegable de institución ---
+    document.addEventListener('DOMContentLoaded', function() {
+      const institucionDropdownBtn = document.getElementById('institucionDropdownBtn');
+      const institucionDropdownMenu = document.getElementById('institucionDropdownMenu');
+      const institucionDropdownIcon = document.getElementById('institucionDropdownIcon');
+      
+      if (institucionDropdownBtn) {
+        institucionDropdownBtn.onclick = function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          const isOpen = !institucionDropdownMenu.classList.contains('hidden');
+          
+          if (isOpen) {
+            institucionDropdownMenu.classList.add('hidden');
+            institucionDropdownIcon.style.transform = 'rotate(0deg)';
+          } else {
+            institucionDropdownMenu.classList.remove('hidden');
+            institucionDropdownIcon.style.transform = 'rotate(180deg)';
+          }
+        };
+        
+        // Cerrar al hacer clic fuera
+        document.addEventListener('click', function(e) {
+          if (!institucionDropdownBtn.contains(e.target) && !institucionDropdownMenu.contains(e.target)) {
+            institucionDropdownMenu.classList.add('hidden');
+            institucionDropdownIcon.style.transform = 'rotate(0deg)';
+          }
+        });
+      }
+      
+      // Manejo del desplegable de Guardar/Abrir
+      const guardarAbrirDropdownBtn = document.getElementById('guardarAbrirDropdownBtn');
+      const guardarAbrirDropdownMenu = document.getElementById('guardarAbrirDropdownMenu');
+      const guardarAbrirDropdownIcon = document.getElementById('guardarAbrirDropdownIcon');
+      
+      if (guardarAbrirDropdownBtn) {
+        guardarAbrirDropdownBtn.onclick = function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          const isOpen = !guardarAbrirDropdownMenu.classList.contains('hidden');
+          
+          if (isOpen) {
+            guardarAbrirDropdownMenu.classList.add('hidden');
+            guardarAbrirDropdownIcon.style.transform = 'rotate(0deg)';
+          } else {
+            guardarAbrirDropdownMenu.classList.remove('hidden');
+            guardarAbrirDropdownIcon.style.transform = 'rotate(180deg)';
+          }
+        };
+        
+        // Cerrar al hacer clic fuera
+        document.addEventListener('click', function(e) {
+          if (!guardarAbrirDropdownBtn.contains(e.target) && !guardarAbrirDropdownMenu.contains(e.target)) {
+            guardarAbrirDropdownMenu.classList.add('hidden');
+            guardarAbrirDropdownIcon.style.transform = 'rotate(0deg)';
+          }
+        });
+      }
+    });
+
+    // --- Utilidades y constantes ---
+    const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    const dayNames = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+
+    // --- Estado global ---
+    let institutions = [];
+    let attendance = {};
+    let selectedMonths = [new Date().getMonth()];
+    let currentYear = new Date().getFullYear();
+    let annualReportPeriod = [5, 6, 7, 8, 9, 10];
+
+    // --- Funciones de cálculo de descuentos ---
+    function calcularDescuentosBPS(ingreso) {
+      return ingreso * 0.15;
+    }
+    
+    function calcularDescuentosFondoCoop(ingreso) {
+      return ingreso * 0.10;
+    }
+    
+    function calcularDescuentosTotales(ingreso) {
+      return calcularDescuentosBPS(ingreso) + calcularDescuentosFondoCoop(ingreso);
+    }
+
+    // --- Persistencia local ---
+    function loadFromLocal() {
+      const inst = localStorage.getItem('clases_institutions');
+      const att = localStorage.getItem('clases_attendance');
+      const selMonths = localStorage.getItem('clases_selectedMonths');
+      const year = localStorage.getItem('clases_currentYear');
+      const period = localStorage.getItem('clases_annualReportPeriod');
+      if (inst) institutions = JSON.parse(inst);
+      if (att) attendance = JSON.parse(att);
+      if (selMonths) selectedMonths = JSON.parse(selMonths);
+      if (year) currentYear = JSON.parse(year);
+      if (period) annualReportPeriod = JSON.parse(period);
+    }
+
+    // --- Modal ---
+    const modalBg = document.getElementById('modalBg');
+    document.getElementById('openModalBtn').onclick = () => { modalBg.classList.remove('hidden'); };
+    document.getElementById('closeModalBtn').onclick = () => { modalBg.classList.add('hidden'); };
+    modalBg.onclick = (e) => { if (e.target === modalBg) modalBg.classList.add('hidden'); };
+
+    // --- Panel de control de instituciones en modal ---
+    const institutionsPanelModal = document.getElementById('institutionsPanelModal');
+    document.getElementById('panelInstitucionesBtn').onclick = () => {
+      institutionsPanelModal.classList.remove('hidden');
+      renderInstitutionsPanel();
+    };
+    document.getElementById('closeInstitutionsPanelBtn').onclick = () => {
+      institutionsPanelModal.classList.add('hidden');
+    };
+
+    // --- Panel de control de instituciones ---
+    function renderInstitutionsPanel() {
+      const list = document.getElementById('institutionsList');
+      if (institutions.length === 0) {
+        list.innerHTML = '<span class="text-gray-500">No hay instituciones registradas.</span>';
+        return;
+      }
+      let html = `<table class="min-w-full text-sm text-left"><thead><tr class="border-b"><th class="py-1 px-2">Nombre</th><th class="py-1 px-2">Valor clase</th><th class="py-1 px-2">Pasaje</th><th class="py-1 px-2">Días</th><th class="py-1 px-2">Boleta</th><th class="py-1 px-2">Acciones</th></tr></thead><tbody>`;
+      institutions.forEach((inst, idx) => {
+        html += `<tr class="border-b">
+          <td class="py-1 px-2">${inst.name}</td>
+          <td class="py-1 px-2">$${inst.value}</td>
+          <td class="py-1 px-2">$${inst.pasaje}</td>
+          <td class="py-1 px-2">${inst.days.map(d=>dayNames[parseInt(d)]).join(', ')}</td>
+          <td class="py-1 px-2">${inst.requiereBoleta ? 'Sí' : 'No'}</td>
+          <td class="py-1 px-2 flex gap-2">
+            <button class="editInstBtn bg-yellow-400 text-white px-2 py-0.5 rounded" data-idx="${idx}">Editar</button>
+            <button class="delInstBtn bg-red-500 text-white px-2 py-0.5 rounded" data-idx="${idx}">Eliminar</button>
+          </td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+      list.innerHTML = html;
+    }
+
+    // --- Exportar JSON ---
+    document.getElementById('exportJsonBtn').onclick = () => {
+      const data = {
+        institutions, attendance, selectedMonths, currentYear, annualReportPeriod
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+      const monthsStr = selectedMonths.map(m => monthNames[m]).join('_');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `clases_${monthsStr}_${currentYear}.json`;
+      a.click();
+    };
+
+    // --- Importar JSON ---
+    document.getElementById('importJsonBtn').onclick = () => {
+      document.getElementById('importFileInput').click();
+    };
+    document.getElementById('importFileInput').onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const data = JSON.parse(evt.target.result);
+          if (data.institutions && data.attendance) {
+            institutions = data.institutions;
+            attendance = data.attendance;
+            if (data.selectedMonths) selectedMonths = data.selectedMonths;
+            if (data.currentYear) currentYear = data.currentYear;
+            if (data.annualReportPeriod) annualReportPeriod = data.annualReportPeriod;
+            localStorage.setItem('clases_institutions', JSON.stringify(institutions));
+            localStorage.setItem('clases_attendance', JSON.stringify(attendance));
+            localStorage.setItem('clases_selectedMonths', JSON.stringify(selectedMonths));
+            localStorage.setItem('clases_currentYear', JSON.stringify(currentYear));
+            localStorage.setItem('clases_annualReportPeriod', JSON.stringify(annualReportPeriod));
+            alert('Datos importados correctamente');
+          }
+        } catch (err) { alert('Archivo inválido'); }
+      };
+      reader.readAsText(file);
+    };
+
+    // --- Modal de reportes ---
+    const reportesModal = document.getElementById('reportesModal');
+    document.getElementById('reportesBtn').onclick = () => {
+      renderReportesTable();
+      reportesModal.classList.remove('hidden');
+    };
+    document.getElementById('closeReportesModalBtn').onclick = () => {
+      reportesModal.classList.add('hidden');
+    };
+    reportesModal.onclick = (e) => {
+      if (e.target === reportesModal) reportesModal.classList.add('hidden');
+    };
+
+    function renderReportesTable() {
+      // Esta función se implementaría con la lógica del dashboard
+      document.getElementById('reportesTableBody').innerHTML = '<tr><td colspan="6" class="text-center py-4">Funcionalidad de reportes disponible desde el dashboard principal</td></tr>';
+    }
+
+    // --- Registro de institución ---
+    document.getElementById('institutionForm').onsubmit = function(e) {
+      e.preventDefault();
+      const name = document.getElementById('instName').value.trim();
+      const value = parseInt(document.getElementById('instValue').value);
+      const pasaje = parseInt(document.getElementById('instPasaje').value);
+      const days = Array.from(document.getElementById('instDays').selectedOptions).map(opt => opt.value);
+      const requiereBoleta = document.getElementById('instRequiereBoleta').checked;
+      if (!name || !value || days.length === 0) return;
+      
+      const id = 'inst' + (institutions.length + 1) + '_' + Date.now();
+      institutions.push({ id, name, value, pasaje, days, requiereBoleta });
+      
+      document.getElementById('institutionForm').reset();
+      modalBg.classList.add('hidden');
+      localStorage.setItem('clases_institutions', JSON.stringify(institutions));
+      alert('Institución agregada correctamente');
+    };
+
+    // Inicialización
+    loadFromLocal();
+    
+    if (typeof renderAlumnosPage === 'function') renderAlumnosPage();
+    // Abrir/cerrar modal de reporte
+    document.getElementById('reportesBtn').onclick = function() {
+      renderReportePagos();
+      document.getElementById('reporteModal').classList.remove('hidden');
+    };
+    document.getElementById('closeReporteModalBtn').onclick = function() {
+      document.getElementById('reporteModal').classList.add('hidden');
+    };
+    document.getElementById('reporteModal').onclick = function(e) {
+      if (e.target === document.getElementById('reporteModal')) document.getElementById('reporteModal').classList.add('hidden');
+    };
+  </script>
+</body>
+</html> 

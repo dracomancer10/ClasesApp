@@ -10,6 +10,19 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Firebase -->
     <script type="module" src="../firebase-config.js"></script>
+    <style>
+        /* ...otros estilos... */
+        @media (max-width: 768px) {
+            .calendar-table {
+                display: block;
+                width: 100vw;
+                overflow-x: auto;
+            }
+            .calendar-table table {
+                min-width: 600px;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Navbar superior simple -->

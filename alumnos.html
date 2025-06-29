@@ -75,6 +75,23 @@
         display: block !important;
       }
     }
+    @media (max-width: 1024px) {
+      .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+      }
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 30;
+      }
+    }
+    @media (min-width: 1025px) {
+      .main-content {
+        margin-left: 12rem !important;
+      }
+    }
   </style>
   
   <!-- Botón de menú móvil -->
@@ -128,31 +145,26 @@
     </div>
   </nav>
   
-  <!-- Contenido principal -->
-  <div class="main-content" style="margin-left: 12rem;">
-    <!-- Header con indicador de sincronización -->
-    <header class="bg-white shadow-sm border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 py-4">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <!-- Título -->
-          <div class="flex items-center">
-            <h1 class="text-2xl font-bold text-gray-800">Gestión de Alumnos</h1>
-          </div>
-          
-          <!-- Indicador de estado de sincronización -->
-          <div class="flex items-center gap-2">
-            <div id="syncStatus" class="flex items-center gap-2 px-3 py-1 rounded-full text-sm">
-              <div id="syncIndicator" class="w-2 h-2 rounded-full bg-gray-400"></div>
-              <span id="syncText">Sin conexión</span>
-            </div>
-            <button id="manualSyncBtn" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition" style="display: none;">
-              🔄 Sincronizar
-            </button>
-          </div>
-        </div>
+  <!-- Header SIEMPRE arriba -->
+  <header class="bg-white shadow-sm border-b border-gray-200 w-full fixed top-0 left-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div class="flex items-center">
+        <h1 class="text-2xl font-bold text-gray-800">Gestión de Alumnos</h1>
       </div>
-    </header>
-    
+      <div class="flex items-center gap-2">
+        <div id="syncStatus" class="flex items-center gap-2 px-3 py-1 rounded-full text-sm">
+          <div id="syncIndicator" class="w-2 h-2 rounded-full bg-gray-400"></div>
+          <span id="syncText">Sin conexión</span>
+        </div>
+        <button id="manualSyncBtn" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition" style="display: none;">
+          🔄 Sincronizar
+        </button>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Ajustar padding-top para que el contenido no quede debajo del header -->
+  <div class="main-content pt-24">
     <!-- Contenido de la página -->
     <div class="flex-1 flex justify-center items-start">
       <div class="max-w-5xl w-full py-8 px-4 bg-white rounded-lg shadow-lg mt-8 mx-4">

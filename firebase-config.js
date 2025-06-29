@@ -106,35 +106,35 @@ async function syncDataToFirebase() {
 // Función para cargar datos desde Firebase
 async function loadDataFromFirebase() {
   if (!currentUser || !isOnline) return;
-  
   try {
     const userDocRef = doc(db, 'users', currentUser.uid);
     const userDoc = await getDoc(userDocRef);
-    
     if (userDoc.exists()) {
       const data = userDoc.data();
-      
-      // Restaurar datos al localStorage
-      if (data.instituciones) localStorage.setItem('clases_institutions', JSON.stringify(data.instituciones));
-      if (data.attendance) localStorage.setItem('clases_attendance', JSON.stringify(data.attendance));
-      if (data.selectedMonths) localStorage.setItem('clases_selectedMonths', JSON.stringify(data.selectedMonths));
-      if (data.currentYear) localStorage.setItem('clases_currentYear', JSON.stringify(data.currentYear));
-      if (data.annualReportPeriod) localStorage.setItem('clases_annualReportPeriod', JSON.stringify(data.annualReportPeriod));
-      if (data.alumnos) localStorage.setItem('alumnos_particulares', JSON.stringify(data.alumnos));
-      if (data.asistenciaAlumnos) localStorage.setItem('asistencia_alumnos', JSON.stringify(data.asistenciaAlumnos));
-      if (data.pagosAlumnos) localStorage.setItem('pagos_alumnos', JSON.stringify(data.pagosAlumnos));
-      if (data.weeklySchedule) localStorage.setItem('weekly-schedule', JSON.stringify(data.weeklySchedule));
-      if (data.gestorFinanciero) localStorage.setItem('gestor_financiero_transactions', JSON.stringify(data.gestorFinanciero));
-      
-      console.log('Datos cargados desde Firebase');
-      showSyncNotification('Datos cargados desde la nube', 'success');
-      
-      // Recargar la página si estamos en una página que muestra datos
-      if (window.location.pathname.includes('dashboard.html') || 
-          window.location.pathname.includes('alumnos.html') ||
-          window.location.pathname.includes('gestor-financiero.html')) {
+      let cambios = false;
+      // Restaurar datos al localStorage solo si son diferentes
+      function setIfChanged(key, value) {
+        const current = localStorage.getItem(key);
+        if (JSON.stringify(value) !== current) {
+          localStorage.setItem(key, JSON.stringify(value));
+          cambios = true;
+        }
+      }
+      if (data.instituciones) setIfChanged('clases_institutions', data.instituciones);
+      if (data.attendance) setIfChanged('clases_attendance', data.attendance);
+      if (data.selectedMonths) setIfChanged('clases_selectedMonths', data.selectedMonths);
+      if (data.currentYear) setIfChanged('clases_currentYear', data.currentYear);
+      if (data.annualReportPeriod) setIfChanged('clases_annualReportPeriod', data.annualReportPeriod);
+      if (data.alumnos) setIfChanged('alumnos_particulares', data.alumnos);
+      if (data.asistenciaAlumnos) setIfChanged('asistencia_alumnos', data.asistenciaAlumnos);
+      if (data.pagosAlumnos) setIfChanged('pagos_alumnos', data.pagosAlumnos);
+      if (data.weeklySchedule) setIfChanged('weekly-schedule', data.weeklySchedule);
+      if (data.gestorFinanciero) setIfChanged('gestor_financiero_transactions', data.gestorFinanciero);
+      // Solo recargar si hay cambios y NO es móvil
+      if (cambios && window.innerWidth > 768) {
         window.location.reload();
       }
+      showSyncNotification('Datos cargados desde la nube', 'success');
     }
   } catch (error) {
     console.error('Error al cargar datos:', error);

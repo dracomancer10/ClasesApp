@@ -3,13 +3,272 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClasesApp - Redirigiendo...</title>
-    <meta http-equiv="refresh" content="0;url=dashboard.html">
+    <title>ClasesApp - Sistema de Gestión de Clases</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Sistema completo de gestión de alumnos, horarios y finanzas para profesores">
+    <meta name="theme-color" content="#4a90e2">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ClasesApp">
+    <meta name="msapplication-TileColor" content="#4a90e2">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16x16.png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="mask-icon" href="icons/icon-192x192.png" color="#4a90e2">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #ffffff;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .install-button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        .install-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+        
+        .install-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* Estilos móviles */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .install-button {
+                width: 100%;
+                margin-top: 1rem;
+            }
+        }
+    </style>
 </head>
-<body>
-    <p>Redirigiendo a ClasesApp...</p>
+<body class="flex items-center justify-center">
+    <div class="container text-center text-white fade-in">
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold mb-4">🎓 ClasesApp</h1>
+            <p class="text-xl opacity-90">Sistema de Gestión de Clases</p>
+            <p class="text-sm opacity-75 mt-2">Actualizado: Enero 2025</p>
+        </div>
+        
+        <div class="mb-8">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <p class="text-lg">Cargando aplicación...</p>
+        </div>
+        
+        <div class="space-y-4">
+            <a href="dashboard.html" 
+               class="inline-block bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                📊 Ir al Dashboard
+            </a>
+            
+            <div class="text-sm opacity-75">
+                <p>Si no se redirige automáticamente, haz clic en el botón</p>
+            </div>
+        </div>
+        
+        <div class="mt-12 text-sm opacity-60">
+            <p>📱 Instalable como aplicación móvil</p>
+            <p>🔄 Funciona offline</p>
+            <p>⚡ Carga rápida</p>
+        </div>
+        
+        <!-- Botón de instalación manual -->
+        <div id="installContainer" class="mt-6" style="display: none;">
+            <button id="installButton" class="install-button">
+                📱 Instalar como App
+            </button>
+        </div>
+        
+        <!-- Instrucciones de instalación -->
+        <div class="mt-8 p-4 bg-white bg-opacity-10 rounded-lg">
+            <h3 class="font-semibold mb-2">📱 Cómo instalar en móvil:</h3>
+            <div class="text-sm space-y-1">
+                <p><strong>Chrome/Edge:</strong> Toca ⋮ → "Instalar aplicación"</p>
+                <p><strong>Safari:</strong> Toca 📤 → "Añadir a pantalla de inicio"</p>
+                <p><strong>Firefox:</strong> Toca ⋮ → "Instalar aplicación"</p>
+            </div>
+        </div>
+    </div>
+
     <script>
-        window.location.href = 'dashboard.html';
+        // Redirección automática después de 3 segundos
+        setTimeout(() => {
+            window.location.href = 'dashboard.html';
+        }, 3000);
+        
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then((registration) => {
+                        console.log('Service Worker registrado:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('Error al registrar Service Worker:', error);
+                    });
+            });
+        }
+        
+        // PWA Install Prompt
+        let deferredPrompt;
+        const installContainer = document.getElementById('installContainer');
+        const installButton = document.getElementById('installButton');
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Mostrar botón de instalación
+            installContainer.style.display = 'block';
+            
+            // Mostrar notificación
+            showInstallNotification();
+        });
+        
+        installButton.addEventListener('click', () => {
+            installApp();
+        });
+        
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('Usuario aceptó instalar la app');
+                        showSuccessNotification();
+                    }
+                    deferredPrompt = null;
+                    installContainer.style.display = 'none';
+                });
+            }
+        }
+        
+        function showInstallNotification() {
+            const notification = document.createElement('div');
+            notification.className = 'install-notification';
+            notification.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <span style="font-size: 24px;">📱</span>
+                    <div>
+                        <div style="font-weight: bold;">¡Instala ClasesApp!</div>
+                        <div style="font-size: 14px; opacity: 0.9;">Accede desde tu pantalla de inicio</div>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
+                        ✕
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+        
+        function showSuccessNotification() {
+            const notification = document.createElement('div');
+            notification.className = 'install-notification';
+            notification.style.background = 'linear-gradient(45deg, #4CAF50, #45a049)';
+            notification.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <span style="font-size: 24px;">✅</span>
+                    <div>
+                        <div style="font-weight: bold;">¡Instalación exitosa!</div>
+                        <div style="font-size: 14px; opacity: 0.9;">La app está disponible en tu pantalla de inicio</div>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
+                        ✕
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+        
+        // Detectar si ya está instalado
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('Aplicación instalada');
+            showSuccessNotification();
+        });
+        
+        // Verificar si es standalone (ya instalado)
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('Aplicación ejecutándose en modo standalone');
+        }
     </script>
 </body>
 </html> 

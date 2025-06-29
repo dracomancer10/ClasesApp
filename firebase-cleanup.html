@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpieza de Firebase - ClasesApp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .danger-zone {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-2xl mx-auto">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">🧹 Limpieza de Firebase</h1>
+                    <p class="text-gray-600">Herramienta para limpiar completamente la base de datos</p>
+                </div>
+
+                <div class="danger-zone rounded-lg p-6 mb-6">
+                    <h2 class="text-xl font-bold text-white mb-4">⚠️ ZONA DE PELIGRO</h2>
+                    <p class="text-white mb-4">
+                        Esta herramienta eliminará <strong>TODOS</strong> los datos de Firebase y localStorage.
+                        Esta acción es <strong>IRREVERSIBLE</strong>.
+                    </p>
+                    <div class="bg-white bg-opacity-20 rounded p-4 mb-4">
+                        <h3 class="font-bold text-white mb-2">¿Qué se eliminará?</h3>
+                        <ul class="text-white text-sm space-y-1">
+                            <li>• Todos los datos de instituciones</li>
+                            <li>• Registros de asistencia</li>
+                            <li>• Datos de alumnos particulares</li>
+                            <li>• Historial de pagos</li>
+                            <li>• Horarios semanales</li>
+                            <li>• Transacciones financieras</li>
+                            <li>• Datos locales del navegador</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <button id="checkStatusBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition-colors">
+                        🔍 Verificar Estado Actual
+                    </button>
+
+                    <div id="statusResult" class="hidden bg-gray-100 rounded-lg p-4">
+                        <h3 class="font-bold text-gray-800 mb-2">Estado de la Base de Datos:</h3>
+                        <div id="statusContent" class="text-sm text-gray-600"></div>
+                    </div>
+
+                    <div class="border-t pt-4">
+                        <button id="cleanupBtn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-lg transition-colors">
+                            🗑️ LIMPIAR BASE DE DATOS COMPLETAMENTE
+                        </button>
+                    </div>
+
+                    <div id="cleanupResult" class="hidden bg-gray-100 rounded-lg p-4">
+                        <h3 class="font-bold text-gray-800 mb-2">Resultado de la Limpieza:</h3>
+                        <div id="cleanupContent" class="text-sm text-gray-600"></div>
+                    </div>
+                </div>
+
+                <div class="mt-8 text-center">
+                    <a href="index.html" class="text-blue-500 hover:text-blue-600 font-medium">
+                        ← Volver al Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="firebase-cleanup.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkStatusBtn = document.getElementById('checkStatusBtn');
+            const cleanupBtn = document.getElementById('cleanupBtn');
+            const statusResult = document.getElementById('statusResult');
+            const statusContent = document.getElementById('statusContent');
+            const cleanupResult = document.getElementById('cleanupResult');
+            const cleanupContent = document.getElementById('cleanupContent');
+
+            // Verificar estado actual
+            checkStatusBtn.addEventListener('click', async function() {
+                checkStatusBtn.disabled = true;
+                checkStatusBtn.textContent = 'Verificando...';
+                
+                try {
+                    await FirebaseCleanup.showDatabaseStatus();
+                    statusContent.innerHTML = `
+                        <p class="text-green-600">✅ Verificación completada. Revisa la consola del navegador para ver los detalles.</p>
+                        <p class="mt-2">Presiona F12 y ve a la pestaña "Console" para ver el estado detallado.</p>
+                    `;
+                    statusResult.classList.remove('hidden');
+                } catch (error) {
+                    statusContent.innerHTML = `
+                        <p class="text-red-600">❌ Error al verificar estado: ${error.message}</p>
+                    `;
+                    statusResult.classList.remove('hidden');
+                } finally {
+                    checkStatusBtn.disabled = false;
+                    checkStatusBtn.textContent = '🔍 Verificar Estado Actual';
+                }
+            });
+
+            // Limpiar base de datos
+            cleanupBtn.addEventListener('click', async function() {
+                const confirmed = confirm('⚠️ ADVERTENCIA: Esta acción eliminará TODOS los datos de Firebase y localStorage.\n\n¿Estás completamente seguro de que quieres continuar?\n\nEsta acción es IRREVERSIBLE.');
+                
+                if (!confirmed) return;
+
+                const doubleConfirmed = confirm('🚨 ÚLTIMA ADVERTENCIA: ¿Estás 100% seguro?\n\nTodos los datos se perderán permanentemente.');
+                
+                if (!doubleConfirmed) return;
+
+                cleanupBtn.disabled = true;
+                cleanupBtn.textContent = 'Limpiando...';
+                
+                try {
+                    await FirebaseCleanup.cleanFirebaseDatabase();
+                    cleanupContent.innerHTML = `
+                        <p class="text-green-600">✅ Limpieza completada exitosamente.</p>
+                        <p class="mt-2">Todos los datos han sido eliminados de Firebase y localStorage.</p>
+                        <p class="mt-2">La aplicación está lista para empezar desde cero.</p>
+                    `;
+                    cleanupResult.classList.remove('hidden');
+                } catch (error) {
+                    cleanupContent.innerHTML = `
+                        <p class="text-red-600">❌ Error durante la limpieza: ${error.message}</p>
+                    `;
+                    cleanupResult.classList.remove('hidden');
+                } finally {
+                    cleanupBtn.disabled = false;
+                    cleanupBtn.textContent = '🗑️ LIMPIAR BASE DE DATOS COMPLETAMENTE';
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

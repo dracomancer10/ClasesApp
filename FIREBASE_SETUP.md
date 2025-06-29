@@ -14,18 +14,18 @@ Firebase es una plataforma de desarrollo de Google que permite sincronizar datos
 ### Indicadores visuales:
 
 🟢 **Verde (Sincronizado)**: 
-- ✅ Conexión a internet activa
-- ✅ Datos sincronizados con la nube
-- ✅ Botón "🔄 Sincronizar" disponible
+- Conexión a internet activa
+- Datos sincronizados con la nube
+- Botón "🔄 Sincronizar" disponible
 
 🟡 **Amarillo (Conectando...)**:
-- ⏳ Conectando a Firebase
-- ⏳ Esperando autenticación
+- Conectando a Firebase
+- Esperando autenticación
 
 🔴 **Rojo (Sin conexión)**:
-- ❌ Sin conexión a internet
-- ❌ Datos guardados localmente
-- ❌ Se sincronizarán cuando haya conexión
+- Sin conexión a internet
+- Los datos se guardan localmente
+- Se sincronizarán cuando se restaure la conexión
 
 ## Cómo funciona la sincronización
 
@@ -122,63 +122,4 @@ La aplicación sincroniza automáticamente:
 
 ---
 
-**¿Necesitas ayuda?** Revisa la consola del navegador (F12) para ver mensajes de error o estado de sincronización.
-
-## Problema Actual
-El error `auth/configuration-not-found` indica que la autenticación anónima no está habilitada en tu proyecto de Firebase.
-
-## Solución
-
-### 1. Habilitar Autenticación Anónima
-
-1. Ve a la [Consola de Firebase](https://console.firebase.google.com/)
-2. Selecciona tu proyecto `clasesapp-caf81`
-3. En el menú lateral, ve a **Authentication**
-4. Haz clic en **Sign-in method**
-5. Busca **Anonymous** en la lista
-6. Haz clic en **Enable** (Habilitar)
-7. Guarda los cambios
-
-### 2. Configurar Reglas de Firestore
-
-1. En la consola de Firebase, ve a **Firestore Database**
-2. Haz clic en **Rules**
-3. Reemplaza las reglas actuales con:
-
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // Permitir acceso a usuarios autenticados
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-  }
-}
-```
-
-4. Haz clic en **Publish**
-
-### 3. Verificar Configuración
-
-Una vez que hayas habilitado la autenticación anónima, la aplicación debería funcionar correctamente sin errores.
-
-## Modo de Desarrollo Actual
-
-Por ahora, la aplicación está configurada para funcionar en modo de desarrollo sin autenticación. Esto significa que:
-
-- Los datos se guardan localmente
-- La sincronización con Firebase está deshabilitada temporalmente
-- No verás errores en la consola
-
-## Próximos Pasos
-
-1. Habilitar autenticación anónima en Firebase
-2. Configurar las reglas de Firestore
-3. Probar la sincronización de datos
-
-## Notas Importantes
-
-- La autenticación anónima es gratuita y no requiere configuración adicional
-- Los datos se sincronizan automáticamente cuando hay conexión a internet
-- Cada usuario tendrá sus propios datos separados 
+**¿Necesitas ayuda?** Revisa la consola del navegador (F12) para ver mensajes de error o estado de sincronización. 

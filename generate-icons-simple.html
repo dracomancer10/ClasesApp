@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generador de Íconos</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .icon { margin: 10px; display: inline-block; text-align: center; }
+        canvas { border: 1px solid #ccc; }
+        button { padding: 10px 20px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Generador de Íconos PWA</h1>
+    <button onclick="generateAll()">Generar y Descargar Todos</button>
+    <div id="icons"></div>
+
+    <script>
+        const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+        
+        function generateIcon(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            // Fondo azul
+            ctx.fillStyle = '#4a90e2';
+            ctx.fillRect(0, 0, size, size);
+            
+            // Círculo blanco para el ícono
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(size/2, size/2, size*0.3, 0, 2*Math.PI);
+            ctx.fill();
+            
+            // Libro
+            ctx.fillStyle = '#4a90e2';
+            ctx.fillRect(size*0.35, size*0.25, size*0.3, size*0.4);
+            
+            // Líneas del libro
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = size*0.02;
+            for(let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                ctx.moveTo(size*0.4, size*0.35 + i*size*0.1);
+                ctx.lineTo(size*0.6, size*0.35 + i*size*0.1);
+                ctx.stroke();
+            }
+            
+            return canvas;
+        }
+        
+        function generateAll() {
+            const container = document.getElementById('icons');
+            container.innerHTML = '';
+            
+            sizes.forEach((size, index) => {
+                setTimeout(() => {
+                    const canvas = generateIcon(size);
+                    
+                    const div = document.createElement('div');
+                    div.className = 'icon';
+                    div.innerHTML = `
+                        <canvas></canvas>
+                        <div>${size}x${size}</div>
+                    `;
+                    div.querySelector('canvas').getContext('2d').drawImage(canvas, 0, 0);
+                    
+                    container.appendChild(div);
+                    
+                    // Descargar automáticamente
+                    const link = document.createElement('a');
+                    link.download = `icon-${size}x${size}.png`;
+                    link.href = canvas.toDataURL();
+                    link.click();
+                }, index * 500);
+            });
+        }
+        
+        // Generar al cargar
+        window.onload = generateAll;
+    </script>
+</body>
+</html> 

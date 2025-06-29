@@ -120,6 +120,9 @@
             <button id="manualSyncBtn" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition" style="display: none;">
               🔄 Sincronizar
             </button>
+            <button id="forceLoadBtn" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition" style="display: none;">
+              📥 Cargar Datos
+            </button>
           </div>
           
           <!-- Selector de meses -->
@@ -1625,6 +1628,40 @@
         };
       }
     };
+
+    // Configurar botón de sincronización manual
+    const manualSyncBtn = document.getElementById('manualSyncBtn');
+    if (manualSyncBtn) {
+      manualSyncBtn.onclick = () => {
+        console.log('🔄 Sincronización manual iniciada...');
+        syncDataToFirebase();
+        manualSyncBtn.disabled = true;
+        manualSyncBtn.textContent = 'Sincronizando...';
+        setTimeout(() => {
+          manualSyncBtn.disabled = false;
+          manualSyncBtn.textContent = '🔄 Sincronizar';
+        }, 3000);
+      };
+    }
+    
+    // Configurar botón de forzar carga
+    const forceLoadBtn = document.getElementById('forceLoadBtn');
+    if (forceLoadBtn) {
+      forceLoadBtn.onclick = () => {
+        console.log('📥 Forzando carga de datos desde Firebase...');
+        if (window.FirebaseSync && window.FirebaseSync.loadDataFromFirebase) {
+          window.FirebaseSync.loadDataFromFirebase();
+          forceLoadBtn.disabled = true;
+          forceLoadBtn.textContent = 'Cargando...';
+          setTimeout(() => {
+            forceLoadBtn.disabled = false;
+            forceLoadBtn.textContent = '📥 Cargar Datos';
+            // Recargar la página para mostrar los datos cargados
+            window.location.reload();
+          }, 2000);
+        }
+      };
+    }
   </script>
 </body>
 </html> 

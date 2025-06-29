@@ -27,7 +27,6 @@ let syncInProgress = false;
 window.addEventListener('online', () => {
   isOnline = true;
   console.log('Conexión restaurada');
-  syncDataToFirebase();
 });
 
 window.addEventListener('offline', () => {
@@ -35,21 +34,24 @@ window.addEventListener('offline', () => {
   console.log('Sin conexión - usando datos locales');
 });
 
-// Autenticación anónima con manejo de errores
+// Usar un ID de usuario fijo para que todos los navegadores compartan datos
+function getFixedUserId() {
+  const domain = window.location.hostname || 'localhost';
+  return 'shared-user-' + domain.replace(/[^a-zA-Z0-9]/g, '');
+}
+
+// Autenticación simplificada
 async function initializeAuth() {
   try {
+    // Intentar autenticación anónima
     await signInAnonymously(auth);
     console.log('Autenticación anónima exitosa');
   } catch (error) {
     console.error('Error en autenticación:', error);
-    // Si falla la autenticación, usar un ID fijo basado en el dominio para que todos los navegadores compartan datos
-    if (error.code === 'auth/configuration-not-found' || error.code === 'auth/operation-not-allowed') {
-      console.log('Usando modo de desarrollo con ID fijo');
-      // Usar un ID fijo basado en el dominio para que todos los navegadores compartan datos
-      const domain = window.location.hostname || 'localhost';
-      currentUser = { uid: 'shared-user-' + domain.replace(/[^a-zA-Z0-9]/g, '') };
-      updateSyncStatus();
-    }
+    // Si falla, usar ID fijo
+    console.log('Usando ID fijo para sincronización');
+    currentUser = { uid: getFixedUserId() };
+    updateSyncStatus();
   }
 }
 
@@ -58,13 +60,16 @@ onAuthStateChanged(auth, (user) => {
   if (user) {
     currentUser = user;
     console.log('Usuario autenticado:', user.uid);
-    // Cargar datos desde Firebase al autenticarse
-    loadDataFromFirebase();
   } else {
-    currentUser = null;
-    console.log('Usuario no autenticado');
+    currentUser = { uid: getFixedUserId() };
+    console.log('Usando ID fijo:', currentUser.uid);
   }
   updateSyncStatus();
+  
+  // Cargar datos una sola vez al inicializar
+  if (isOnline) {
+    loadDataFromFirebase();
+  }
 });
 
 // Función para sincronizar datos a Firebase
@@ -72,6 +77,7 @@ async function syncDataToFirebase() {
   if (!currentUser || !isOnline || syncInProgress) return;
   
   syncInProgress = true;
+  console.log('Iniciando sincronización a Firebase...');
   
   try {
     const userDocRef = doc(db, 'users', currentUser.uid);
@@ -92,13 +98,12 @@ async function syncDataToFirebase() {
     };
     
     await setDoc(userDocRef, dataToSync, { merge: true });
-    console.log('Datos sincronizados a Firebase');
+    console.log('✅ Datos sincronizados a Firebase exitosamente');
     
-    // Mostrar notificación de sincronización
     showSyncNotification('Datos sincronizados correctamente', 'success');
     
   } catch (error) {
-    console.error('Error al sincronizar:', error);
+    console.error('❌ Error al sincronizar:', error);
     showSyncNotification('Error al sincronizar datos', 'error');
   } finally {
     syncInProgress = false;
@@ -107,48 +112,53 @@ async function syncDataToFirebase() {
 
 // Función para cargar datos desde Firebase
 async function loadDataFromFirebase() {
-  if (!currentUser || !isOnline) return;
+  if (!currentUser || !isOnline) {
+    console.log('No se puede cargar desde Firebase: sin conexión o usuario');
+    return;
+  }
   
   try {
+    console.log('Cargando datos desde Firebase...');
     const userDocRef = doc(db, 'users', currentUser.uid);
     const userDoc = await getDoc(userDocRef);
     
     if (userDoc.exists()) {
       const data = userDoc.data();
-      let cambios = false;
+      let datosCargados = 0;
       
-      // Solo cargar datos si no existen localmente
-      function setIfNotExists(key, value) {
-        const current = localStorage.getItem(key);
-        if (!current && value) {
+      // Cargar datos al localStorage
+      const datosParaCargar = [
+        { key: 'clases_institutions', value: data.instituciones },
+        { key: 'clases_attendance', value: data.attendance },
+        { key: 'clases_selectedMonths', value: data.selectedMonths },
+        { key: 'clases_currentYear', value: data.currentYear },
+        { key: 'clases_annualReportPeriod', value: data.annualReportPeriod },
+        { key: 'alumnos_particulares', value: data.alumnos },
+        { key: 'asistencia_alumnos', value: data.asistenciaAlumnos },
+        { key: 'pagos_alumnos', value: data.pagosAlumnos },
+        { key: 'weekly-schedule', value: data.weeklySchedule },
+        { key: 'gestor_financiero_transactions', value: data.gestorFinanciero }
+      ];
+      
+      datosParaCargar.forEach(({ key, value }) => {
+        if (value) {
           localStorage.setItem(key, JSON.stringify(value));
-          cambios = true;
-          console.log('Dato cargado desde Firebase:', key);
+          datosCargados++;
+          console.log(`✅ Cargado: ${key}`);
         }
-      }
+      });
       
-      setIfNotExists('clases_institutions', data.instituciones);
-      setIfNotExists('clases_attendance', data.attendance);
-      setIfNotExists('clases_selectedMonths', data.selectedMonths);
-      setIfNotExists('clases_currentYear', data.currentYear);
-      setIfNotExists('clases_annualReportPeriod', data.annualReportPeriod);
-      setIfNotExists('alumnos_particulares', data.alumnos);
-      setIfNotExists('asistencia_alumnos', data.asistenciaAlumnos);
-      setIfNotExists('pagos_alumnos', data.pagosAlumnos);
-      setIfNotExists('weekly-schedule', data.weeklySchedule);
-      setIfNotExists('gestor_financiero_transactions', data.gestorFinanciero);
-      
-      if (cambios) {
-        console.log('Datos cargados desde Firebase - NO se recarga la página');
-        showSyncNotification('Datos cargados desde la nube', 'success');
+      if (datosCargados > 0) {
+        console.log(`✅ Se cargaron ${datosCargados} tipos de datos desde Firebase`);
+        showSyncNotification(`Datos cargados desde la nube (${datosCargados} tipos)`, 'success');
       } else {
-        console.log('No hay datos nuevos para cargar desde Firebase');
+        console.log('ℹ️ No hay datos nuevos para cargar desde Firebase');
       }
     } else {
-      console.log('No hay datos en Firebase para este usuario');
+      console.log('ℹ️ No hay datos en Firebase para este usuario');
     }
   } catch (error) {
-    console.error('Error al cargar datos:', error);
+    console.error('❌ Error al cargar datos:', error);
     showSyncNotification('Error al cargar datos desde la nube', 'error');
   }
 }
@@ -182,19 +192,18 @@ function showSyncNotification(message, type = 'info') {
 
 // Función para sincronizar automáticamente cuando cambian los datos
 function setupAutoSync() {
-  // DESHABILITAR sincronización automática para evitar recargas infinitas
-  console.log('Sincronización automática deshabilitada para evitar recargas infinitas');
+  console.log('Configurando sincronización automática...');
   
-  // Interceptar cambios en localStorage pero NO sincronizar automáticamente
+  // Interceptar cambios en localStorage
   const originalSetItem = localStorage.setItem;
   localStorage.setItem = function(key, value) {
     originalSetItem.apply(this, arguments);
     
-    // Solo mostrar en consola, NO sincronizar
+    // Solo mostrar en consola, NO sincronizar automáticamente
     if (key.startsWith('clases_') || key === 'alumnos_particulares' || 
         key === 'asistencia_alumnos' || key === 'pagos_alumnos' || 
         key === 'weekly-schedule' || key === 'gestor_financiero_transactions') {
-      console.log('Dato guardado localmente:', key, 'Valor:', value);
+      console.log('💾 Dato guardado localmente:', key);
     }
   };
 }
@@ -204,6 +213,7 @@ function getSyncStatus() {
   return {
     isOnline,
     isAuthenticated: !!currentUser,
+    userId: currentUser ? currentUser.uid : 'none',
     lastSync: localStorage.getItem('lastFirebaseSync')
   };
 }
@@ -213,6 +223,7 @@ function updateSyncStatus() {
   const syncIndicator = document.getElementById('syncIndicator');
   const syncText = document.getElementById('syncText');
   const manualSyncBtn = document.getElementById('manualSyncBtn');
+  const forceLoadBtn = document.getElementById('forceLoadBtn');
   
   if (!syncIndicator || !syncText) return;
   
@@ -220,30 +231,35 @@ function updateSyncStatus() {
     syncIndicator.className = 'w-2 h-2 rounded-full bg-red-500';
     syncText.textContent = 'Sin conexión';
     if (manualSyncBtn) manualSyncBtn.style.display = 'none';
+    if (forceLoadBtn) forceLoadBtn.style.display = 'none';
   } else if (!currentUser) {
     syncIndicator.className = 'w-2 h-2 rounded-full bg-yellow-500';
     syncText.textContent = 'Conectando...';
     if (manualSyncBtn) manualSyncBtn.style.display = 'none';
+    if (forceLoadBtn) forceLoadBtn.style.display = 'none';
   } else {
     syncIndicator.className = 'w-2 h-2 rounded-full bg-green-500';
-    syncText.textContent = 'Sincronizado';
+    syncText.textContent = 'Conectado';
     if (manualSyncBtn) manualSyncBtn.style.display = 'inline-block';
+    if (forceLoadBtn) forceLoadBtn.style.display = 'inline-block';
   }
 }
 
 // Inicializar cuando se carga el script
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('🚀 Inicializando Firebase Sync...');
   initializeAuth();
   setupAutoSync();
   updateSyncStatus();
   
-  // Actualizar estado de sincronización cada 5 segundos
-  setInterval(updateSyncStatus, 5000);
+  // Actualizar estado de sincronización cada 10 segundos
+  setInterval(updateSyncStatus, 10000);
   
   // Configurar botón de sincronización manual
   const manualSyncBtn = document.getElementById('manualSyncBtn');
   if (manualSyncBtn) {
     manualSyncBtn.onclick = () => {
+      console.log('🔄 Sincronización manual iniciada...');
       syncDataToFirebase();
       manualSyncBtn.disabled = true;
       manualSyncBtn.textContent = 'Sincronizando...';

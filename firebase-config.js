@@ -108,35 +108,44 @@ async function syncDataToFirebase() {
 // Función para cargar datos desde Firebase
 async function loadDataFromFirebase() {
   if (!currentUser || !isOnline) return;
+  
   try {
     const userDocRef = doc(db, 'users', currentUser.uid);
     const userDoc = await getDoc(userDocRef);
+    
     if (userDoc.exists()) {
       const data = userDoc.data();
       let cambios = false;
-      // Restaurar datos al localStorage solo si son diferentes
-      function setIfChanged(key, value) {
+      
+      // Solo cargar datos si no existen localmente
+      function setIfNotExists(key, value) {
         const current = localStorage.getItem(key);
-        if (JSON.stringify(value) !== current) {
+        if (!current && value) {
           localStorage.setItem(key, JSON.stringify(value));
           cambios = true;
+          console.log('Dato cargado desde Firebase:', key);
         }
       }
-      if (data.instituciones) setIfChanged('clases_institutions', data.instituciones);
-      if (data.attendance) setIfChanged('clases_attendance', data.attendance);
-      if (data.selectedMonths) setIfChanged('clases_selectedMonths', data.selectedMonths);
-      if (data.currentYear) setIfChanged('clases_currentYear', data.currentYear);
-      if (data.annualReportPeriod) setIfChanged('clases_annualReportPeriod', data.annualReportPeriod);
-      if (data.alumnos) setIfChanged('alumnos_particulares', data.alumnos);
-      if (data.asistenciaAlumnos) setIfChanged('asistencia_alumnos', data.asistenciaAlumnos);
-      if (data.pagosAlumnos) setIfChanged('pagos_alumnos', data.pagosAlumnos);
-      if (data.weeklySchedule) setIfChanged('weekly-schedule', data.weeklySchedule);
-      if (data.gestorFinanciero) setIfChanged('gestor_financiero_transactions', data.gestorFinanciero);
-      // Solo recargar si hay cambios y NO es móvil
-      if (cambios && window.innerWidth > 768) {
-        window.location.reload();
+      
+      setIfNotExists('clases_institutions', data.instituciones);
+      setIfNotExists('clases_attendance', data.attendance);
+      setIfNotExists('clases_selectedMonths', data.selectedMonths);
+      setIfNotExists('clases_currentYear', data.currentYear);
+      setIfNotExists('clases_annualReportPeriod', data.annualReportPeriod);
+      setIfNotExists('alumnos_particulares', data.alumnos);
+      setIfNotExists('asistencia_alumnos', data.asistenciaAlumnos);
+      setIfNotExists('pagos_alumnos', data.pagosAlumnos);
+      setIfNotExists('weekly-schedule', data.weeklySchedule);
+      setIfNotExists('gestor_financiero_transactions', data.gestorFinanciero);
+      
+      if (cambios) {
+        console.log('Datos cargados desde Firebase - NO se recarga la página');
+        showSyncNotification('Datos cargados desde la nube', 'success');
+      } else {
+        console.log('No hay datos nuevos para cargar desde Firebase');
       }
-      showSyncNotification('Datos cargados desde la nube', 'success');
+    } else {
+      console.log('No hay datos en Firebase para este usuario');
     }
   } catch (error) {
     console.error('Error al cargar datos:', error);
@@ -173,16 +182,19 @@ function showSyncNotification(message, type = 'info') {
 
 // Función para sincronizar automáticamente cuando cambian los datos
 function setupAutoSync() {
-  // Interceptar cambios en localStorage
+  // DESHABILITAR sincronización automática para evitar recargas infinitas
+  console.log('Sincronización automática deshabilitada para evitar recargas infinitas');
+  
+  // Interceptar cambios en localStorage pero NO sincronizar automáticamente
   const originalSetItem = localStorage.setItem;
   localStorage.setItem = function(key, value) {
     originalSetItem.apply(this, arguments);
     
-    // Sincronizar después de un breve delay para evitar múltiples sincronizaciones
+    // Solo mostrar en consola, NO sincronizar
     if (key.startsWith('clases_') || key === 'alumnos_particulares' || 
         key === 'asistencia_alumnos' || key === 'pagos_alumnos' || 
         key === 'weekly-schedule' || key === 'gestor_financiero_transactions') {
-      setTimeout(syncDataToFirebase, 1000);
+      console.log('Dato guardado localmente:', key, 'Valor:', value);
     }
   };
 }

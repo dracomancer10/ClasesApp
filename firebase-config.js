@@ -35,13 +35,19 @@ window.addEventListener('offline', () => {
   console.log('Sin conexión - usando datos locales');
 });
 
-// Autenticación anónima
+// Autenticación anónima con manejo de errores
 async function initializeAuth() {
   try {
     await signInAnonymously(auth);
     console.log('Autenticación anónima exitosa');
   } catch (error) {
     console.error('Error en autenticación:', error);
+    // Si falla la autenticación, usar un ID falso para desarrollo
+    if (error.code === 'auth/configuration-not-found' || error.code === 'auth/operation-not-allowed') {
+      console.log('Usando modo de desarrollo sin autenticación');
+      currentUser = { uid: 'dev-user-' + Date.now() };
+      updateSyncStatus();
+    }
   }
 }
 
@@ -56,6 +62,7 @@ onAuthStateChanged(auth, (user) => {
     currentUser = null;
     console.log('Usuario no autenticado');
   }
+  updateSyncStatus();
 });
 
 // Función para sincronizar datos a Firebase

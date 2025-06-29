@@ -11,7 +11,7 @@
   <!-- Firebase -->
   <script type="module" src="firebase-config.js"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex">
+<body class="bg-gray-100 min-h-screen">
   <!-- Sidebar de navegación sobria -->
   <style>
     .sidebar-btn {
@@ -45,15 +45,47 @@
     .dropdown-text:hover {
       color: rgb(147, 197, 253);
     }
+    
+    /* Estilos responsivos */
     @media (max-width: 768px) {
-      nav { 
-        min-width: 100vw !important; 
-        width: 100vw !important; 
-        position: relative !important; 
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+      }
+      .mobile-menu-btn {
+        display: block !important;
+      }
+      .desktop-nav {
+        display: none !important;
+      }
+    }
+    
+    @media (min-width: 769px) {
+      .mobile-menu-btn {
+        display: none !important;
+      }
+      .desktop-nav {
+        display: block !important;
       }
     }
   </style>
-  <nav class="bg-gray-900 text-white w-48 min-h-screen flex flex-col py-6 px-4 fixed left-0 top-0 z-30 shadow-lg">
+  
+  <!-- Botón de menú móvil -->
+  <button id="mobileMenuBtn" class="mobile-menu-btn fixed top-4 left-4 z-50 bg-gray-900 text-white p-2 rounded-lg shadow-lg">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+    </svg>
+  </button>
+  
+  <!-- Sidebar -->
+  <nav id="sidebar" class="sidebar desktop-nav bg-gray-900 text-white w-48 min-h-screen flex flex-col py-6 px-4 fixed left-0 top-0 z-30 shadow-lg">
     <span class="text-2xl font-bold tracking-wide mb-8 text-center sidebar-text">Panel de Gestión</span>
     <div class="flex flex-col gap-2 flex-1">
       <a href="dashboard.html" id="dashboardNavBtn" class="sidebar-btn">Inicio</a>
@@ -96,34 +128,39 @@
     </div>
   </nav>
   
-  <!-- Header con indicador de sincronización -->
-  <header class="bg-white shadow-sm border-b border-gray-200" style="margin-left:12rem;">
-    <div class="max-w-7xl mx-auto px-4 py-4">
-      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <!-- Título -->
-        <div class="flex items-center">
-          <h1 class="text-2xl font-bold text-gray-800">Gestión de Alumnos</h1>
-        </div>
-        
-        <!-- Indicador de estado de sincronización -->
-        <div class="flex items-center gap-2">
-          <div id="syncStatus" class="flex items-center gap-2 px-3 py-1 rounded-full text-sm">
-            <div id="syncIndicator" class="w-2 h-2 rounded-full bg-gray-400"></div>
-            <span id="syncText">Sin conexión</span>
+  <!-- Contenido principal -->
+  <div class="main-content" style="margin-left: 12rem;">
+    <!-- Header con indicador de sincronización -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 py-4">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <!-- Título -->
+          <div class="flex items-center">
+            <h1 class="text-2xl font-bold text-gray-800">Gestión de Alumnos</h1>
           </div>
-          <button id="manualSyncBtn" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition" style="display: none;">
-            🔄 Sincronizar
-          </button>
+          
+          <!-- Indicador de estado de sincronización -->
+          <div class="flex items-center gap-2">
+            <div id="syncStatus" class="flex items-center gap-2 px-3 py-1 rounded-full text-sm">
+              <div id="syncIndicator" class="w-2 h-2 rounded-full bg-gray-400"></div>
+              <span id="syncText">Sin conexión</span>
+            </div>
+            <button id="manualSyncBtn" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition" style="display: none;">
+              🔄 Sincronizar
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  </header>
-  
-  <div class="flex-1 flex justify-center items-start" style="margin-left:12rem;">
-    <div class="max-w-5xl w-full py-8 px-4 bg-white rounded-lg shadow-lg mt-8">
-      <div id="alumnosPage"></div>
+    </header>
+    
+    <!-- Contenido de la página -->
+    <div class="flex-1 flex justify-center items-start">
+      <div class="max-w-5xl w-full py-8 px-4 bg-white rounded-lg shadow-lg mt-8 mx-4">
+        <div id="alumnosPage"></div>
+      </div>
     </div>
   </div>
+
   <!-- Modal de registro de institución -->
   <div id="modalBg" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-30 hidden">
     <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative overflow-y-auto max-h-[90vh]">
@@ -476,6 +513,32 @@
     document.getElementById('reporteModal').onclick = function(e) {
       if (e.target === document.getElementById('reporteModal')) document.getElementById('reporteModal').classList.add('hidden');
     };
+
+    // --- Funcionalidad del menú móvil ---
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.querySelector('.main-content');
+
+    // Abrir/cerrar menú móvil
+    mobileMenuBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+    });
+
+    // Cerrar menú al hacer clic fuera en móvil
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768) {
+        if (!sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+          sidebar.classList.remove('open');
+        }
+      }
+    });
+
+    // Cerrar menú al cambiar tamaño de ventana
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 768) {
+        sidebar.classList.remove('open');
+      }
+    });
   </script>
 </body>
 </html> 

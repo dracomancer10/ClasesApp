@@ -42,10 +42,12 @@ async function initializeAuth() {
     console.log('Autenticación anónima exitosa');
   } catch (error) {
     console.error('Error en autenticación:', error);
-    // Si falla la autenticación, usar un ID falso para desarrollo
+    // Si falla la autenticación, usar un ID fijo basado en el dominio para que todos los navegadores compartan datos
     if (error.code === 'auth/configuration-not-found' || error.code === 'auth/operation-not-allowed') {
-      console.log('Usando modo de desarrollo sin autenticación');
-      currentUser = { uid: 'dev-user-' + Date.now() };
+      console.log('Usando modo de desarrollo con ID fijo');
+      // Usar un ID fijo basado en el dominio para que todos los navegadores compartan datos
+      const domain = window.location.hostname || 'localhost';
+      currentUser = { uid: 'shared-user-' + domain.replace(/[^a-zA-Z0-9]/g, '') };
       updateSyncStatus();
     }
   }

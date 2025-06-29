@@ -1470,13 +1470,14 @@
       monthDays.forEach(d => { if (days.includes(d.day)) count++; });
       return count;
     }
-    // En el cálculo de proyección y gasto de pasajes:
-    const diasTrabajar = getDiasTrabajar(inst, month.number, currentYear);
-    let proyeccion = diasTrabajar * inst.value;
-    let gastoPasajesProyectado = diasTrabajar * inst.pasaje;
-    // ...
-    // No sumar días extra a la proyección, solo a ingresos reales si corresponde.
-    // ...
+    
+    // NOTA: El cálculo de proyección y gasto de pasajes se hace dentro de los bucles donde 'inst' está definida
+    // Ejemplo de uso dentro de un bucle:
+    // institutions.forEach(inst => {
+    //   const diasTrabajar = getDiasTrabajar(inst, month.number, currentYear);
+    //   let proyeccion = diasTrabajar * inst.value;
+    //   let gastoPasajesProyectado = diasTrabajar * inst.pasaje;
+    // });
 
     // --- Funciones para guardar y cargar toda la configuración ---
     document.getElementById('guardarTodoBtn').onclick = () => {
